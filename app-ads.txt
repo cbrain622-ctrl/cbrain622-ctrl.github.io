@@ -1,4 +1,5 @@
 google.com, pub-8525997645935578, DIRECT, f08c47fec0942fa0
+ogury.com, 065d4ff5-a269-44be-9634-9d4d7af2dfc3, RESELLER
 inmobi.com, 23d316d3d980453d8ea0dcf9caec4078, RESELLER, 83e75a7ae333ca9d
 openx.com, 537153564, RESELLER, 6a698e2ec38604c6
 openx.com, 561470659, RESELLER, 6a698e2ec38604c6
