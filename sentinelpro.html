@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentinel Pro | Advanced Expert Advisor</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        
+        /* Custom Scrollbar for Terms & Conditions */
+        .terms-container::-webkit-scrollbar { width: 6px; }
+        .terms-container::-webkit-scrollbar-track { background: rgba(31, 41, 55, 0.5); border-radius: 8px; }
+        .terms-container::-webkit-scrollbar-thumb { background: #d97706; border-radius: 8px; }
+        .terms-container::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
+
+        /* Subtle glow for the gold text */
+        .text-glow { text-shadow: 0 0 20px rgba(245, 158, 11, 0.4); }
+        
+        /* Glassmorphism utilities */
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-[#0a0f16] text-gray-300 antialiased selection:bg-yellow-500 selection:text-gray-900 relative">
+
+    <!-- Background Decoration (Blurred Orbs) -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-yellow-600/10 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
+
+    <!-- Hero Section -->
+    <header class="pt-24 pb-16 px-4 text-center max-w-5xl mx-auto relative z-10">
+        <div class="inline-block px-4 py-1.5 rounded-full border border-yellow-500/30 bg-yellow-500/10 text-yellow-400 text-sm font-semibold tracking-widest uppercase mb-6 shadow-[0_0_15px_rgba(234,179,8,0.15)]">
+            Algoritma Trading Presisi Tinggi
+        </div>
+        <h1 class="text-5xl md:text-7xl font-extrabold text-white mb-6 tracking-tight">
+            <span class="bg-clip-text text-transparent bg-gradient-to-r from-yellow-200 via-yellow-500 to-amber-600 text-glow">
+                SENTINEL PRO
+            </span>
+        </h1>
+        <p class="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
+            Sistem otomatisasi kelas institusional yang dirancang khusus untuk meminimalisir risiko melalui skema <i>Smart Drawdown Recovery</i> dan analisis pergerakan pasar XAUUSD.
+        </p>
+    </header>
+
+    <!-- Keunggulan Fitur Section -->
+    <section class="max-w-6xl mx-auto px-4 mb-20 relative z-10">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Fitur & Keunggulan <span class="text-yellow-500">Premium</span></h2>
+            <p class="text-gray-400 max-w-2xl mx-auto">EA cerdas tahan banting yang dirancang khusus untuk menghadapi kondisi pasar volatil dengan proteksi berlapis.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Fitur 1 -->
+            <div class="bg-[#111827]/80 backdrop-blur-sm border border-gray-800 p-6 rounded-2xl hover:border-yellow-500/50 transition-all duration-300 group hover:-translate-y-1 shadow-lg">
+                <div class="text-yellow-500 mb-4 bg-yellow-500/10 w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Smart Drawdown Recovery</h3>
+                <p class="text-gray-400 text-sm mb-3">Tidak hanya menahan minus! EA ini memiliki 3 lapis perlindungan dan mampu memotong posisi rugi serta membuka lot recovery secara cerdas. Posisi profit dibiarkan hidup sebagai "Survivor".</p>
+            </div>
+
+            <!-- Fitur 2 -->
+            <div class="bg-[#111827]/80 backdrop-blur-sm border border-gray-800 p-6 rounded-2xl hover:border-yellow-500/50 transition-all duration-300 group hover:-translate-y-1 shadow-lg">
+                <div class="text-yellow-500 mb-4 bg-yellow-500/10 w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Cooldown & Trend Reversal</h3>
+                <p class="text-gray-400 text-sm mb-3">Setelah cut loss, EA beristirahat (cooldown) dan membaca indikator EMA (50 & 200) serta ATR. Memastikan tren sudah aman dan berbalik sebelum kembali masuk pasar.</p>
+            </div>
+
+            <!-- Fitur 3 -->
+            <div class="bg-[#111827]/80 backdrop-blur-sm border border-gray-800 p-6 rounded-2xl hover:border-yellow-500/50 transition-all duration-300 group hover:-translate-y-1 shadow-lg">
+                <div class="text-yellow-500 mb-4 bg-yellow-500/10 w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Auto News Filter</h3>
+                <p class="text-gray-400 text-sm mb-3">Terintegrasi dengan kalender ekonomi MQL5. EA akan otomatis menjeda aktivitas trading sebelum dan sesudah rilis berita fundamental High Impact.</p>
+            </div>
+
+            <!-- Fitur 4 -->
+            <div class="bg-[#111827]/80 backdrop-blur-sm border border-gray-800 p-6 rounded-2xl hover:border-yellow-500/50 transition-all duration-300 group hover:-translate-y-1 shadow-lg">
+                <div class="text-yellow-500 mb-4 bg-yellow-500/10 w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Dynamic Grid (ATR)</h3>
+                <p class="text-gray-400 text-sm mb-3">Jarak averaging dihitung secara dinamis. Jika volatilitas harga sedang kencang, jarak antar posisi otomatis melebar sehingga Margin Anda lebih tahan banting.</p>
+            </div>
+
+            <!-- Fitur 5 -->
+            <div class="bg-[#111827]/80 backdrop-blur-sm border border-gray-800 p-6 rounded-2xl hover:border-yellow-500/50 transition-all duration-300 group hover:-translate-y-1 shadow-lg">
+                <div class="text-yellow-500 mb-4 bg-yellow-500/10 w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Trailing Survivor & Saklar Darurat</h3>
+                <p class="text-gray-400 text-sm mb-3">Mengamankan profit dengan sistem Trailing Stop. Terdapat saklar darurat yang memaksa tutup semua posisi jika trailing tersentuh untuk mencegah kebocoran margin.</p>
+            </div>
+
+            <!-- Fitur 6 -->
+            <div class="bg-[#111827]/80 backdrop-blur-sm border border-gray-800 p-6 rounded-2xl hover:border-yellow-500/50 transition-all duration-300 group hover:-translate-y-1 shadow-lg">
+                <div class="text-yellow-500 mb-4 bg-yellow-500/10 w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Target Harian & Proteksi Broker</h3>
+                <p class="text-gray-400 text-sm mb-3">Otomatis berhenti trading jika target harian USD tercapai. Dilengkapi proteksi eksekusi untuk menghindari slippage dan spread broker yang melebar tidak wajar.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technical Specifications Card -->
+    <section class="max-w-4xl mx-auto px-4 mb-16 relative z-10">
+        <div class="glass-panel p-8 rounded-2xl shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600"></div>
+            
+            <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Spesifikasi Teknis & Kebutuhan
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Tipe Akun -->
+                <div class="bg-[#111827] border border-gray-800 p-5 rounded-xl hover:border-yellow-500/50 transition-colors duration-300 group">
+                    <div class="text-yellow-500 mb-2 group-hover:scale-110 transition-transform origin-left">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-white font-semibold text-lg mb-1">Tipe Akun</h3>
+                    <p class="text-gray-400 text-sm">Dirancang secara spesifik dan diuji komprehensif untuk akun <strong class="text-white">Cent</strong> dan <strong class="text-white">Standard</strong>.</p>
+                </div>
+                
+                <!-- Syarat Broker -->
+                <div class="bg-[#111827] border border-gray-800 p-5 rounded-xl hover:border-yellow-500/50 transition-colors duration-300 group">
+                    <div class="text-yellow-500 mb-2 group-hover:scale-110 transition-transform origin-left">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-white font-semibold text-lg mb-1">Wajib Hedging</h3>
+                    <p class="text-gray-400 text-sm">Broker <strong>wajib</strong> mengizinkan posisi Hedging. Kode EA akan menganalisa server secara otomatis dan akan <strong class="text-red-400">menolak eksekusi</strong> jika fitur Hedging dilarang.</p>
+                </div>
+
+                <!-- Leverage -->
+                <div class="bg-[#111827] border border-gray-800 p-5 rounded-xl hover:border-yellow-500/50 transition-colors duration-300 group">
+                    <div class="text-yellow-500 mb-2 group-hover:scale-110 transition-transform origin-left">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                    </div>
+                    <h3 class="text-white font-semibold text-lg mb-1">Kebutuhan Leverage</h3>
+                    <p class="text-gray-400 text-sm">Minimal: <strong class="text-white">1:500</strong><br>Maksimal: <strong class="text-white">1:1000</strong> (atau lebih). Diperlukan untuk menjaga ketahanan <i>margin level</i> saat siklus recovery.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Checkout / Legal Agreement Section -->
+    <section class="max-w-4xl mx-auto px-4 mb-24 relative z-10">
+        <div class="bg-[#0f151f] border border-[#2a3441] p-8 md:p-10 rounded-3xl shadow-2xl">
+            
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-white mb-2">Aktivasi Lisensi Sentinel Pro</h2>
+                <p class="text-gray-400">Lisensi Seumur Hidup (Lifetime) &middot; <strong class="text-yellow-500 text-xl tracking-wide">$XXX</strong></p>
+            </div>
+
+            <div class="bg-red-950/20 border-l-4 border-red-500 p-4 rounded-r-md mb-8 flex items-start">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <p class="text-red-400 text-sm leading-relaxed">
+                    <strong>PERINGATAN HUKUM:</strong> Baca seluruh Syarat & Ketentuan di bawah ini. Anda tidak dapat melanjutkan proses pembayaran sebelum membaca dan menyetujui seluruh klausul perlindungan hukum bagi pihak Pengembang.
+                </p>
+            </div>
+
+            <!-- Terminal-style Terms and Conditions Box -->
+            <div class="terms-container bg-[#0a0f16] border border-[#1f2937] rounded-xl p-6 h-80 overflow-y-auto mb-8 text-sm text-gray-400 leading-relaxed shadow-inner font-light">
+                <h3 class="text-lg font-semibold text-white mb-6 text-center sticky top-0 bg-[#0a0f16] py-2 border-b border-gray-800 z-10">SYARAT DAN KETENTUAN PENGGUNAAN & DISCLAIMER HUKUM</h3>
+                
+                <p class="mb-5"><strong>PENTING: HARAP BACA DENGAN SEKSAMA.</strong><br>
+                Dokumen ini merupakan perjanjian hukum yang sah dan mengikat antara Anda (selanjutnya disebut sebagai <strong>"Pembeli"</strong> atau <strong>"Pengguna"</strong>) dan Pengembang/Penjual Expert Advisor ini (selanjutnya disebut sebagai <strong>"Pengembang"</strong>).</p>
+                
+                <div class="p-4 bg-yellow-900/10 border border-yellow-700/30 rounded-lg mb-6">
+                    <p class="text-yellow-500/90 font-medium uppercase tracking-wider text-xs leading-relaxed">
+                    DENGAN MELAKUKAN PEMBELIAN, MENGUNDUH, MENGINSTAL, ATAU MENGGUNAKAN EXPERT ADVISOR (EA) SENTINEL PRO INI, PEMBELI MENYATAKAN BAHWA PEMBELI TELAH MEMBACA, MEMAHAMI, DAN MENYETUJUI SELURUH SYARAT DAN KETENTUAN DI BAWAH INI TANPA PAKSAAN DARI PIHAK MANAPUN.
+                    </p>
+                </div>
+
+                <h4 class="text-gray-200 font-semibold mt-6 mb-2">1. Peringatan Risiko Tinggi (High-Risk Warning)</h4>
+                <ul class="list-disc pl-5 mb-5 space-y-2">
+                    <li><strong>Risiko Kehilangan Modal:</strong> Perdagangan valuta asing (Forex) dan komoditas (termasuk XAUUSD/Emas) menggunakan sistem margin membawa tingkat risiko yang sangat tinggi. Pembeli menyadari sepenuhnya bahwa ada kemungkinan Pembeli dapat kehilangan sebagian atau <strong>seluruh</strong> modal awal (Margin Call/Stop Out).</li>
+                    <li><strong>Gunakan Dana Bebas:</strong> Pembeli diwajibkan hanya menggunakan dana yang relakan untuk hilang, bukan uang kebutuhan pokok atau dana pinjaman.</li>
+                </ul>
+
+                <h4 class="text-gray-200 font-semibold mt-6 mb-2">2. Tidak Ada Jaminan Keuntungan (No Guarantee of Profit)</h4>
+                <ul class="list-disc pl-5 mb-5 space-y-2">
+                    <li><strong>Kinerja Masa Lalu:</strong> Kinerja masa lalu (backtest maupun forward test) dari EA ini <strong>bukanlah jaminan</strong> atau indikasi keuntungan mutlak di masa depan.</li>
+                    <li><strong>Kondisi Pasar Berubah:</strong> Pasar finansial bersifat dinamis. Algoritma dibangun dari data historis yang bisa tidak relevan saat terjadi <i>Black Swan event</i> atau fundamental ekstrem.</li>
+                    <li><strong>Bukan Nasihat Keuangan:</strong> Penjualan Sentinel Pro murni sebagai alat bantu eksekusi perangkat lunak (software). Tidak boleh ditafsirkan sebagai nasihat investasi.</li>
+                </ul>
+
+                <h4 class="text-gray-200 font-semibold mt-6 mb-2">3. Batasan Tanggung Jawab (Limitation of Liability)</h4>
+                <ul class="list-disc pl-5 mb-5 space-y-2">
+                    <li><strong>Pelepasan Tanggung Jawab Finansial:</strong> Pengembang <strong>TIDAK BERTANGGUNG JAWAB SECARA HUKUM MAUPUN FINANSIAL</strong> atas kerugian materiil, kebangkrutan, atau hilangnya profit yang dialami oleh Pembeli.</li>
+                    <li><strong>Kondisi "Apa Adanya":</strong> EA diberikan sebagaimana adanya tanpa jaminan akan terbebas dari kesalahan teknis akibat pembaruan platform MetaTrader.</li>
+                </ul>
+
+                <h4 class="text-gray-200 font-semibold mt-6 mb-2">4. Analisis Sistem Broker & Faktor Eksternal</h4>
+                <p class="mb-5">Sentinel Pro memuat kode analisa untuk mendeteksi validitas tipe akun dan perizinan Hedging pada broker. Pengembang dibebaskan dari segala tuntutan jika EA menolak beroperasi di broker yang tidak sesuai standar spesifikasi. Segala masalah eksternal seperti manipulasi broker, slippage tak wajar, atau server VPS lumpuh adalah di luar tanggung jawab Pengembang.</p>
+
+                <h4 class="text-gray-200 font-semibold mt-6 mb-2">5. Tanggung Jawab Pengguna (User Responsibilities)</h4>
+                <ul class="list-disc pl-5 mb-5 space-y-2">
+                    <li><strong>Wajib Uji Coba:</strong> Pembeli setuju untuk selalu menguji EA ini di akun <strong>Demo</strong> atau akun <strong>Cent</strong> berisiko rendah terlebih dahulu.</li>
+                    <li><strong>Kontrol Parameter:</strong> Segala input Lot, target, dan batasan risiko murni menjadi kendali Pembeli.</li>
+                    <li><strong>Intervensi Manual:</strong> Pembeli berhak dan disarankan menutup posisi secara manual dalam kondisi pasar anomali.</li>
+                </ul>
+
+                <h4 class="text-gray-200 font-semibold mt-6 mb-2 text-yellow-500">6. Kebijakan Modifikasi Parameter (Parameter Modification Policy)</h4>
+                <p class="mb-5">Sentinel Pro telah dioptimasi dan diuji secara ketat menggunakan parameter bawaan (<i>default settings</i>) standar pengembang. Terkait perubahan pengaturan, berlaku ketentuan ketat berikut:</p>
+                <ul class="list-disc pl-5 mb-5 space-y-2">
+                    <li><strong>Pelepasan Tanggung Jawab Pengaturan Eksternal:</strong> Segala bentuk modifikasi, perubahan, atau penyimpangan parameter <i>input</i> (seperti nominal lot, jarak <i>step</i>, <i>multiplier</i>, maupun target TP) di luar standar bawaan pengembang sepenuhnya merupakan tanggung jawab Pembeli. Pengembang tidak dapat dimintai pertanggungjawaban atas malfungsi strategi, lonjakan <i>drawdown</i>, atau kerugian finansial akibat konfigurasi yang tidak standar.</li>
+                    <li><strong>Syarat Mutlak Kustomisasi:</strong> Pembeli diperbolehkan mengeksplorasi dan merubah parameter untuk menyesuaikan strategi <i>trading</i> pribadi. Namun, hal ini diperbolehkan dengan <strong>SYARAT MUTLAK</strong> bahwa Pembeli wajib melakukan proses <i>Backtest</i> historis dan <i>Forward Test</i> di akun Demo secara mandiri guna memvalidasi ketahanan serta keamanan pengaturan baru tersebut sebelum menerapkannya di akun <i>Real/Live</i>.</li>
+                </ul>
+
+                <h4 class="text-gray-200 font-semibold mt-6 mb-2">7. Hak Kekayaan Intelektual & Anti-Pembajakan</h4>
+                <p class="mb-5">Pembeli <strong>DILARANG KERAS</strong> mendistribusikan ulang, menyewakan, menjual (resell), atau melakukan <i>reverse engineering</i> (membongkar kode) pada Sentinel Pro. Sanksi pelanggaran adalah pencabutan lisensi permanen dan proses hukum.</p>
+
+                <h4 class="text-gray-200 font-semibold mt-6 mb-2">8. Kebijakan Pengembalian Dana (Strict No Refund Policy)</h4>
+                <p class="mb-5">Karena produk merupakan barang digital (software), maka <strong>SEMUA PENJUALAN ADALAH FINAL. TIDAK ADA PENGEMBALIAN DANA (REFUND)</strong> dengan alasan apapun, termasuk dan tidak terbatas pada: Margin Call, ketidakcocokan strategi, atau kendala perangkat.</p>
+
+                <h4 class="text-gray-200 font-semibold mt-6 mb-2">9. Pelepasan Tuntutan Hukum Terpadu</h4>
+                <p class="mb-2">Dengan mencentang dan membeli, Pembeli secara tegas:</p>
+                <ol class="list-decimal pl-5 mb-5 space-y-2">
+                    <li>Membebaskan Pengembang dari segala bentuk tuntutan hukum, gugatan perdata, dan laporan pidana.</li>
+                    <li>Menerima 100% risiko bisnis <i>trading</i> sebagai risiko pribadi.</li>
+                    <li>Sepakat menyelesaikan sengketa teknis secara kekeluargaan/Bipartit tanpa intervensi pihak berwenang/pengadilan.</li>
+                </ol>
+            </div>
+
+            <!-- Custom Checkbox Agreement -->
+            <label class="flex items-start space-x-4 mb-8 cursor-pointer group p-4 rounded-xl hover:bg-[#161e2b] transition-colors border border-transparent hover:border-gray-800">
+                <div class="flex-shrink-0 mt-1 relative">
+                    <input type="checkbox" id="agreeCheckbox" class="peer appearance-none w-6 h-6 border-2 border-gray-600 rounded bg-[#0a0f16] checked:bg-yellow-500 checked:border-yellow-500 cursor-pointer transition-all duration-200">
+                    <svg class="absolute top-1 left-1 w-4 h-4 text-gray-900 opacity-0 peer-checked:opacity-100 transition-opacity duration-200 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <span class="text-sm text-gray-400 group-hover:text-gray-300 transition-colors leading-relaxed">
+                    Saya menyatakan secara sadar telah membaca, memahami, dan menyetujui seluruh isi <strong>Syarat dan Ketentuan serta Disclaimer Hukum</strong> di atas. Transaksi pembelian ini adalah bukti sah persetujuan mutlak saya tanpa paksaan, dan saya melepaskan seluruh hak untuk melakukan tuntutan hukum apapun kepada Pengembang.
+                </span>
+            </label>
+
+            <!-- Checkout Button -->
+            <button id="buyButton" disabled class="group relative w-full overflow-hidden rounded-xl bg-gray-800 text-gray-500 font-bold py-5 text-lg cursor-not-allowed transition-all duration-300 flex justify-center items-center">
+                <!-- Lock Icon for disabled state -->
+                <svg id="lockIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <!-- Unlock/Arrow Icon for enabled state (hidden by default) -->
+                <svg id="unlockIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+                
+                <span id="btnText">Centang Persetujuan Untuk Membeli</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800 bg-[#05080c] py-10 text-center px-4 relative z-10">
+        <h2 class="text-xl font-bold text-gray-600 mb-2">SENTINEL PRO</h2>
+        <p class="text-gray-500 text-xs mb-4">&copy; 2026 Hak Cipta Dilindungi Undang-Undang.</p>
+        <p class="text-[10px] text-gray-600 max-w-3xl mx-auto uppercase tracking-wider">
+            Trading Forex & Gold (XAUUSD) carries a high level of risk. Only invest money you can afford to lose.
+        </p>
+    </footer>
+
+    <!-- Button Interaction Logic -->
+    <script>
+        const checkbox = document.getElementById('agreeCheckbox');
+        const buyButton = document.getElementById('buyButton');
+        const lockIcon = document.getElementById('lockIcon');
+        const unlockIcon = document.getElementById('unlockIcon');
+        const btnText = document.getElementById('btnText');
+
+        // ==========================================
+        // SETTING TELEGRAM
+        // ==========================================
+        const telegramUsername = "ea_sentinel"; 
+        
+        // Pesan otomatis yang akan langsung terketik di chat pembeli
+        const pesanOtomatis = "Halo! Saya sudah membaca dan menyetujui Syarat & Ketentuan. Saya ingin membeli Lisensi EA Sentinel Pro.";
+        
+        // Link yang di-generate otomatis
+        const checkoutLink = `https://t.me/${telegramUsername}?text=${encodeURIComponent(pesanOtomatis)}`; 
+        // ==========================================
+
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                // Style Aktif (Emas, Glow, Siap di-klik)
+                buyButton.disabled = false;
+                buyButton.className = "group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-yellow-500 to-amber-600 text-gray-900 font-extrabold py-5 text-lg cursor-pointer shadow-[0_0_30px_rgba(245,158,11,0.4)] hover:shadow-[0_0_40px_rgba(245,158,11,0.6)] hover:scale-[1.02] transition-all duration-300 flex justify-center items-center";
+                
+                lockIcon.classList.add('hidden');
+                unlockIcon.classList.remove('hidden');
+                unlockIcon.classList.add('animate-pulse');
+                btnText.innerText = "Hubungi Developer via Telegram";
+            } else {
+                // Style Terkunci (Abu-abu, tidak bisa di-klik)
+                buyButton.disabled = true;
+                buyButton.className = "group relative w-full overflow-hidden rounded-xl bg-gray-800 text-gray-500 font-bold py-5 text-lg cursor-not-allowed transition-all duration-300 flex justify-center items-center";
+                
+                lockIcon.classList.remove('hidden');
+                unlockIcon.classList.add('hidden');
+                unlockIcon.classList.remove('animate-pulse');
+                btnText.innerText = "Centang Persetujuan Untuk Membeli";
+            }
+        });
+
+        buyButton.addEventListener('click', function() {
+            if (!this.disabled) {
+                // Efek loading simpel
+                btnText.innerText = "Membuka Telegram...";
+                setTimeout(() => {
+                    // Buka link Telegram di tab baru (target _blank)
+                    window.open(checkoutLink, '_blank');
+                    
+                    // Kembalikan teks tombol seperti semula setelah diklik
+                    setTimeout(() => {
+                        btnText.innerText = "Hubungi Developer via Telegram";
+                    }, 1000);
+                }, 500);
+            }
+        });
+    </script>
+</body>
+</html>
