@@ -11,11 +11,11 @@
     <style>
         body { font-family: 'Poppins', sans-serif; }
         
-        /* Custom Scrollbar for Terms & Conditions */
-        .terms-container::-webkit-scrollbar { width: 6px; }
-        .terms-container::-webkit-scrollbar-track { background: rgba(31, 41, 55, 0.5); border-radius: 8px; }
-        .terms-container::-webkit-scrollbar-thumb { background: #d97706; border-radius: 8px; }
-        .terms-container::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
+        /* Custom Scrollbar for Terms & Conditions (Update Tema Terang) */
+        .terms-container::-webkit-scrollbar { width: 8px; }
+        .terms-container::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 8px; }
+        .terms-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+        .terms-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
         /* Subtle glow for the gold text */
         .text-glow { text-shadow: 0 0 20px rgba(245, 158, 11, 0.4); }
@@ -181,62 +181,64 @@
                 </p>
             </div>
 
-            <!-- Terminal-style Terms and Conditions Box -->
-            <div class="terms-container bg-[#0a0f16] border border-[#1f2937] rounded-xl p-6 h-80 overflow-y-auto mb-8 text-sm text-gray-400 leading-relaxed shadow-inner font-light">
-                <h3 class="text-lg font-semibold text-white mb-6 text-center sticky top-0 bg-[#0a0f16] py-2 border-b border-gray-800 z-10">SYARAT DAN KETENTUAN PENGGUNAAN & DISCLAIMER HUKUM</h3>
+            <!-- Bagian Judul dipindah ke luar agar tidak menghalangi saat scroll -->
+            <h3 class="text-xl font-bold text-white mb-4 text-center">SYARAT DAN KETENTUAN PENGGUNAAN & DISCLAIMER HUKUM</h3>
+
+            <!-- Terminal-style Terms and Conditions Box (Updated to White Theme) -->
+            <div class="terms-container bg-white border border-gray-200 rounded-xl p-6 h-80 overflow-y-auto mb-8 text-sm text-gray-700 leading-relaxed shadow-inner">
                 
-                <p class="mb-5"><strong>PENTING: HARAP BACA DENGAN SEKSAMA.</strong><br>
+                <p class="mb-5"><strong class="text-gray-900">PENTING: HARAP BACA DENGAN SEKSAMA.</strong><br>
                 Dokumen ini merupakan perjanjian hukum yang sah dan mengikat antara Anda (selanjutnya disebut sebagai <strong>"Pembeli"</strong> atau <strong>"Pengguna"</strong>) dan Pengembang/Penjual Expert Advisor ini (selanjutnya disebut sebagai <strong>"Pengembang"</strong>).</p>
                 
-                <div class="p-4 bg-yellow-900/10 border border-yellow-700/30 rounded-lg mb-6">
-                    <p class="text-yellow-500/90 font-medium uppercase tracking-wider text-xs leading-relaxed">
+                <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg mb-6">
+                    <p class="text-yellow-800 font-bold uppercase tracking-wider text-xs leading-relaxed">
                     DENGAN MELAKUKAN PEMBELIAN, MENGUNDUH, MENGINSTAL, ATAU MENGGUNAKAN EXPERT ADVISOR (EA) SENTINEL PRO INI, PEMBELI MENYATAKAN BAHWA PEMBELI TELAH MEMBACA, MEMAHAMI, DAN MENYETUJUI SELURUH SYARAT DAN KETENTUAN DI BAWAH INI TANPA PAKSAAN DARI PIHAK MANAPUN.
                     </p>
                 </div>
 
-                <h4 class="text-gray-200 font-semibold mt-6 mb-2">1. Peringatan Risiko Tinggi (High-Risk Warning)</h4>
+                <h4 class="text-gray-900 font-bold mt-6 mb-2">1. Peringatan Risiko Tinggi (High-Risk Warning)</h4>
                 <ul class="list-disc pl-5 mb-5 space-y-2">
                     <li><strong>Risiko Kehilangan Modal:</strong> Perdagangan valuta asing (Forex) dan komoditas (termasuk XAUUSD/Emas) menggunakan sistem margin membawa tingkat risiko yang sangat tinggi. Pembeli menyadari sepenuhnya bahwa ada kemungkinan Pembeli dapat kehilangan sebagian atau <strong>seluruh</strong> modal awal (Margin Call/Stop Out).</li>
                     <li><strong>Gunakan Dana Bebas:</strong> Pembeli diwajibkan hanya menggunakan dana yang relakan untuk hilang, bukan uang kebutuhan pokok atau dana pinjaman.</li>
                 </ul>
 
-                <h4 class="text-gray-200 font-semibold mt-6 mb-2">2. Tidak Ada Jaminan Keuntungan (No Guarantee of Profit)</h4>
+                <h4 class="text-gray-900 font-bold mt-6 mb-2">2. Tidak Ada Jaminan Keuntungan (No Guarantee of Profit)</h4>
                 <ul class="list-disc pl-5 mb-5 space-y-2">
                     <li><strong>Kinerja Masa Lalu:</strong> Kinerja masa lalu (backtest maupun forward test) dari EA ini <strong>bukanlah jaminan</strong> atau indikasi keuntungan mutlak di masa depan.</li>
                     <li><strong>Kondisi Pasar Berubah:</strong> Pasar finansial bersifat dinamis. Algoritma dibangun dari data historis yang bisa tidak relevan saat terjadi <i>Black Swan event</i> atau fundamental ekstrem.</li>
                     <li><strong>Bukan Nasihat Keuangan:</strong> Penjualan Sentinel Pro murni sebagai alat bantu eksekusi perangkat lunak (software). Tidak boleh ditafsirkan sebagai nasihat investasi.</li>
                 </ul>
 
-                <h4 class="text-gray-200 font-semibold mt-6 mb-2">3. Batasan Tanggung Jawab (Limitation of Liability)</h4>
+                <h4 class="text-gray-900 font-bold mt-6 mb-2">3. Batasan Tanggung Jawab (Limitation of Liability)</h4>
                 <ul class="list-disc pl-5 mb-5 space-y-2">
                     <li><strong>Pelepasan Tanggung Jawab Finansial:</strong> Pengembang <strong>TIDAK BERTANGGUNG JAWAB SECARA HUKUM MAUPUN FINANSIAL</strong> atas kerugian materiil, kebangkrutan, atau hilangnya profit yang dialami oleh Pembeli.</li>
                     <li><strong>Kondisi "Apa Adanya":</strong> EA diberikan sebagaimana adanya tanpa jaminan akan terbebas dari kesalahan teknis akibat pembaruan platform MetaTrader.</li>
                 </ul>
 
-                <h4 class="text-gray-200 font-semibold mt-6 mb-2">4. Analisis Sistem Broker & Faktor Eksternal</h4>
+                <h4 class="text-gray-900 font-bold mt-6 mb-2">4. Analisis Sistem Broker & Faktor Eksternal</h4>
                 <p class="mb-5">Sentinel Pro memuat kode analisa untuk mendeteksi validitas tipe akun dan perizinan Hedging pada broker. Pengembang dibebaskan dari segala tuntutan jika EA menolak beroperasi di broker yang tidak sesuai standar spesifikasi. Segala masalah eksternal seperti manipulasi broker, slippage tak wajar, atau server VPS lumpuh adalah di luar tanggung jawab Pengembang.</p>
 
-                <h4 class="text-gray-200 font-semibold mt-6 mb-2">5. Tanggung Jawab Pengguna (User Responsibilities)</h4>
+                <h4 class="text-gray-900 font-bold mt-6 mb-2">5. Tanggung Jawab Pengguna (User Responsibilities)</h4>
                 <ul class="list-disc pl-5 mb-5 space-y-2">
                     <li><strong>Wajib Uji Coba:</strong> Pembeli setuju untuk selalu menguji EA ini di akun <strong>Demo</strong> atau akun <strong>Cent</strong> berisiko rendah terlebih dahulu.</li>
                     <li><strong>Kontrol Parameter:</strong> Segala input Lot, target, dan batasan risiko murni menjadi kendali Pembeli.</li>
                     <li><strong>Intervensi Manual:</strong> Pembeli berhak dan disarankan menutup posisi secara manual dalam kondisi pasar anomali.</li>
                 </ul>
 
-                <h4 class="text-gray-200 font-semibold mt-6 mb-2 text-yellow-500">6. Kebijakan Modifikasi Parameter (Parameter Modification Policy)</h4>
+                <h4 class="text-amber-600 font-bold mt-6 mb-2">6. Kebijakan Modifikasi Parameter (Parameter Modification Policy)</h4>
                 <p class="mb-5">Sentinel Pro telah dioptimasi dan diuji secara ketat menggunakan parameter bawaan (<i>default settings</i>) standar pengembang. Terkait perubahan pengaturan, berlaku ketentuan ketat berikut:</p>
                 <ul class="list-disc pl-5 mb-5 space-y-2">
                     <li><strong>Pelepasan Tanggung Jawab Pengaturan Eksternal:</strong> Segala bentuk modifikasi, perubahan, atau penyimpangan parameter <i>input</i> (seperti nominal lot, jarak <i>step</i>, <i>multiplier</i>, maupun target TP) di luar standar bawaan pengembang sepenuhnya merupakan tanggung jawab Pembeli. Pengembang tidak dapat dimintai pertanggungjawaban atas malfungsi strategi, lonjakan <i>drawdown</i>, atau kerugian finansial akibat konfigurasi yang tidak standar.</li>
                     <li><strong>Syarat Mutlak Kustomisasi:</strong> Pembeli diperbolehkan mengeksplorasi dan merubah parameter untuk menyesuaikan strategi <i>trading</i> pribadi. Namun, hal ini diperbolehkan dengan <strong>SYARAT MUTLAK</strong> bahwa Pembeli wajib melakukan proses <i>Backtest</i> historis dan <i>Forward Test</i> di akun Demo secara mandiri guna memvalidasi ketahanan serta keamanan pengaturan baru tersebut sebelum menerapkannya di akun <i>Real/Live</i>.</li>
                 </ul>
 
-                <h4 class="text-gray-200 font-semibold mt-6 mb-2">7. Hak Kekayaan Intelektual & Anti-Pembajakan</h4>
+                <h4 class="text-gray-900 font-bold mt-6 mb-2">7. Hak Kekayaan Intelektual & Anti-Pembajakan</h4>
                 <p class="mb-5">Pembeli <strong>DILARANG KERAS</strong> mendistribusikan ulang, menyewakan, menjual (resell), atau melakukan <i>reverse engineering</i> (membongkar kode) pada Sentinel Pro. Sanksi pelanggaran adalah pencabutan lisensi permanen dan proses hukum.</p>
 
-                <h4 class="text-gray-200 font-semibold mt-6 mb-2">8. Kebijakan Pengembalian Dana (Strict No Refund Policy)</h4>
+                <h4 class="text-gray-900 font-bold mt-6 mb-2">8. Kebijakan Pengembalian Dana (Strict No Refund Policy)</h4>
                 <p class="mb-5">Karena produk merupakan barang digital (software), maka <strong>SEMUA PENJUALAN ADALAH FINAL. TIDAK ADA PENGEMBALIAN DANA (REFUND)</strong> dengan alasan apapun, termasuk dan tidak terbatas pada: Margin Call, ketidakcocokan strategi, atau kendala perangkat.</p>
 
-                <h4 class="text-gray-200 font-semibold mt-6 mb-2">9. Pelepasan Tuntutan Hukum Terpadu</h4>
+                <h4 class="text-gray-900 font-bold mt-6 mb-2">9. Pelepasan Tuntutan Hukum Terpadu</h4>
                 <p class="mb-2">Dengan mencentang dan membeli, Pembeli secara tegas:</p>
                 <ol class="list-decimal pl-5 mb-5 space-y-2">
                     <li>Membebaskan Pengembang dari segala bentuk tuntutan hukum, gugatan perdata, dan laporan pidana.</li>
