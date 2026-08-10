@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bagan Pertandingan POESAKA SETDA 2026</title>
+    
+    <!-- Import Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Import Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Import Canvas Confetti for winning animation -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            red: '#e53e3e',
+                            darkred: '#c53030',
+                            light: '#fef2f2',
+                            border: '#fca5a5'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #ffffff; }
+        
+        /* Custom scrollbar for horizontal scrolling if needed */
+        .bracket-scroll::-webkit-scrollbar { height: 10px; width: 10px; }
+        .bracket-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 8px; }
+        .bracket-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+        .bracket-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Hide number input arrows */
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"] { -moz-appearance: textfield; }
+
+        /* Card Animation */
+        .shuffling {
+            animation: pulse-border 0.2s infinite alternate;
+        }
+        @keyframes pulse-border {
+            from { border-color: #e53e3e; box-shadow: 0 0 5px #fca5a5; }
+            to { border-color: #991b1b; box-shadow: 0 0 15px #e53e3e; }
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Header Section -->
+    <header class="bg-gradient-to-r from-brand-darkred to-brand-red text-white shadow-md relative z-20">
+        <div class="max-w-7xl mx-auto px-4 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
+                <div class="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <i data-lucide="trophy" class="w-8 h-8 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-wide">BAGAN POESAKA SETDA 2026</h1>
+                    <p class="text-sm text-red-100 font-medium">Turnamen Bulu Tangkis Antar Biro (11 Tim)</p>
+                </div>
+            </div>
+            
+            <div class="flex gap-3">
+                <button onclick="startShuffleAnimation()" class="flex items-center gap-2 bg-white text-brand-darkred px-5 py-2.5 rounded-lg font-bold shadow-lg hover:bg-gray-100 transition-all active:scale-95">
+                    <i data-lucide="shuffle" class="w-5 h-5"></i>
+                    Acak Tim (Undian)
+                </button>
+                <button onclick="resetTournament()" class="flex items-center gap-2 bg-brand-darkred border border-red-400 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-red-900 transition-all active:scale-95">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                    Reset Skor
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Bracket Area -->
+    <main class="flex-1 w-full overflow-hidden relative bg-slate-50">
+        <!-- Interactive Zoom/Pan Wrapper -->
+        <div class="bracket-scroll w-full h-full overflow-auto relative p-8 cursor-grab active:cursor-grabbing" id="scroll-container">
+            
+            <!-- Bracket Canvas (Fixed width/height for layout positioning) -->
+            <div id="bracket-container" class="relative w-[1100px] h-[700px] mx-auto bg-white rounded-2xl shadow-sm border border-slate-200">
+                
+                <!-- SVG Background for connection lines -->
+                <svg id="lines-canvas" class="absolute top-0 left-0 w-full h-full pointer-events-none z-0"></svg>
+                
+                <!-- Column Labels -->
+                <div class="absolute top-4 left-[20px] w-[220px] text-center font-bold text-slate-500 text-sm tracking-widest">PENYISIHAN</div>
+                <div class="absolute top-4 left-[280px] w-[220px] text-center font-bold text-slate-500 text-sm tracking-widest">PEREMPAT FINAL</div>
+                <div class="absolute top-4 left-[540px] w-[220px] text-center font-bold text-slate-500 text-sm tracking-widest">SEMI FINAL</div>
+                <div class="absolute top-4 left-[800px] w-[220px] text-center font-bold text-brand-red text-sm tracking-widest">GRAND FINAL</div>
+
+                <!-- Match Cards will be dynamically injected here -->
+                <div id="matches-wrapper" class="absolute top-0 left-0 w-full h-full z-10"></div>
+                
+                <!-- Overlay for Animation Loading -->
+                <div id="loading-overlay" class="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-50 hidden flex-col justify-center items-center rounded-2xl">
+                    <i data-lucide="loader-2" class="w-12 h-12 text-brand-red animate-spin mb-3"></i>
+                    <h2 class="text-xl font-bold text-slate-800 tracking-wide">Mengundi Tim...</h2>
+                    <p class="text-slate-500 text-sm mt-1">Sistem sedang membagi bagan secara adil</p>
+                </div>
+            </div>
+            
+            <!-- Legend / Info -->
+            <div class="text-center mt-6 text-sm text-slate-400">
+                * Masukkan skor pada kotak kecil di samping nama tim. Sistem akan otomatis memajukan pemenang ke babak berikutnya.
+            </div>
+        </div>
+    </main>
+
+    <!-- Script Logic -->
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // Data 11 Tim
+        const bureaus = [
+            "Biro Pemerintahan & Otda", 
+            "Biro Hukum dan HAM", 
+            "Biro Kesra",
+            "Biro Perekonomian", 
+            "Biro BUMD & Investasi",
+            "Biro Pengadaan (PBJ)", 
+            "Biro Organisasi", 
+            "Biro Umum", 
+            "Biro Adm Pimpinan",
+            "Keamanan Setda Prov.",
+            "Petugas Kebersihan"
+        ];
+
+        // Definisi Posisi Layout (X, Y) untuk 11 TIM
+        // X: 20, 280, 540, 800
+        const bracketConfig = {
+            m1: { label: 'Match 1 (Penyisihan)', x: 20, y: 50, t1: null, t2: null, s1: null, s2: null, next: 'm4', nextPos: 't1' },
+            m2: { label: 'Match 2 (Penyisihan)', x: 20, y: 190, t1: null, t2: null, s1: null, s2: null, next: 'm5', nextPos: 't1' },
+            m3: { label: 'Match 3 (Penyisihan)', x: 20, y: 330, t1: null, t2: null, s1: null, s2: null, next: 'm6', nextPos: 't1' },
+            
+            m4: { label: 'Match 4 (Perempat Final 1)', x: 280, y: 70, t1: 'Menunggu M1', t2: null, s1: null, s2: null, next: 'm8', nextPos: 't1' },
+            m5: { label: 'Match 5 (Perempat Final 2)', x: 280, y: 210, t1: 'Menunggu M2', t2: null, s1: null, s2: null, next: 'm8', nextPos: 't2' },
+            m6: { label: 'Match 6 (Perempat Final 3)', x: 280, y: 350, t1: 'Menunggu M3', t2: null, s1: null, s2: null, next: 'm9', nextPos: 't1' },
+            m7: { label: 'Match 7 (Perempat Final 4)', x: 280, y: 490, t1: null, t2: null, s1: null, s2: null, next: 'm9', nextPos: 't2' },
+            
+            m8: { label: 'Match 8 (Semi Final 1)', x: 540, y: 140, t1: 'Menunggu M4', t2: 'Menunggu M5', s1: null, s2: null, next: 'm10', nextPos: 't1', loserNext: 'm11', loserPos: 't1' },
+            m9: { label: 'Match 9 (Semi Final 2)', x: 540, y: 420, t1: 'Menunggu M6', t2: 'Menunggu M7', s1: null, s2: null, next: 'm10', nextPos: 't2', loserNext: 'm11', loserPos: 't2' },
+            
+            m10: { label: 'Match 10 (GRAND FINAL)', x: 800, y: 280, t1: 'Menunggu SF1', t2: 'Menunggu SF2', s1: null, s2: null, isFinal: true, color: 'border-brand-red' },
+            m11: { label: 'Match 11 (PEREBUTAN JUARA 3)', x: 800, y: 550, t1: 'Kalah SF1', t2: 'Kalah SF2', s1: null, s2: null, isThird: true, color: 'border-indigo-400' }
+        };
+
+        let matches = JSON.parse(JSON.stringify(bracketConfig));
+        let isShuffling = false;
+
+        // --- SISTEM PENYIMPANAN OTOMATIS (LOCAL STORAGE) ---
+        function saveData() {
+            localStorage.setItem('poesakaBracketState_2026', JSON.stringify(matches));
+        }
+        // --------------------------------------------------
+
+        function assignTeams(teamArray) {
+            // Reset state
+            matches = JSON.parse(JSON.stringify(bracketConfig));
+            
+            // Assigning 11 teams
+            // 3 matches in preliminary (6 teams)
+            matches.m1.t1 = teamArray[0];
+            matches.m1.t2 = teamArray[1];
+            matches.m2.t1 = teamArray[2];
+            matches.m2.t2 = teamArray[3];
+            matches.m3.t1 = teamArray[4];
+            matches.m3.t2 = teamArray[5];
+            
+            // 5 teams get BYE (straight to Quarterfinals)
+            matches.m4.t2 = teamArray[6]; // m4.t1 waits for m1
+            matches.m5.t2 = teamArray[7]; // m5.t1 waits for m2
+            matches.m6.t2 = teamArray[8]; // m6.t1 waits for m3
+            matches.m7.t1 = teamArray[9]; // Both got BYE
+            matches.m7.t2 = teamArray[10];
+        }
+
+        function shuffleArray(array) {
+            let curId = array.length;
+            while (0 !== curId) {
+                let randId = Math.floor(Math.random() * curId);
+                curId -= 1;
+                let tmp = array[curId];
+                array[curId] = array[randId];
+                array[randId] = tmp;
+            }
+            return array;
+        }
+
+        function startShuffleAnimation() {
+            if (isShuffling) return;
+            isShuffling = true;
+            
+            const overlay = document.getElementById('loading-overlay');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+
+            let shuffleCount = 0;
+            const maxShuffles = 15; // 15 frames of animation
+            
+            // Temporary rapid shuffling for visual effect
+            const shuffleInterval = setInterval(() => {
+                let tempTeams = [...bureaus];
+                assignTeams(shuffleArray(tempTeams));
+                renderBracket(true); // pass true for animation mode
+                shuffleCount++;
+                
+                if (shuffleCount >= maxShuffles) {
+                    clearInterval(shuffleInterval);
+                    finishShuffle();
+                }
+            }, 100); // 100ms per frame = 1.5 seconds total
+        }
+
+        function finishShuffle() {
+            // Final definitive shuffle
+            let finalTeams = [...bureaus];
+            assignTeams(shuffleArray(finalTeams));
+            
+            const overlay = document.getElementById('loading-overlay');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+            
+            isShuffling = false;
+            saveData(); // Simpan struktur bagan setelah diacak
+            renderBracket();
+            drawLines();
+
+            // Fire Confetti!
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#e53e3e', '#ffffff', '#c53030'] // Red and White confetti
+            });
+        }
+
+        function updateScore(matchId, team, value) {
+            if (isShuffling) return; // Prevent edits during animation
+
+            let val = parseInt(value);
+            matches[matchId][team] = isNaN(val) ? null : val;
+            
+            checkWinner(matchId);
+            saveData(); // Simpan data setiap kali skor diubah
+            renderBracket();
+            drawLines();
+        }
+
+        function checkWinner(matchId) {
+            const m = matches[matchId];
+            if (m.s1 !== null && m.s2 !== null && m.s1 !== m.s2) {
+                const winnerName = m.s1 > m.s2 ? m.t1 : m.t2;
+                const loserName = m.s1 < m.s2 ? m.t1 : m.t2;
+                
+                // Advance Winner
+                if (m.next) {
+                    matches[m.next][m.nextPos] = winnerName;
+                    // Reset scores of the next match if team changes
+                    matches[m.next].s1 = null;
+                    matches[m.next].s2 = null;
+                    checkWinner(m.next); 
+                }
+                
+                // Advance Loser (for Semifinals to 3rd Place match)
+                if (m.loserNext) {
+                    matches[m.loserNext][m.loserPos] = loserName;
+                    matches[m.loserNext].s1 = null;
+                    matches[m.loserNext].s2 = null;
+                    checkWinner(m.loserNext);
+                }
+            } else {
+                // If scores are cleared or tied, clear downstream
+                clearDownstream(matchId);
+            }
+        }
+
+        function clearDownstream(matchId) {
+            const m = matches[matchId];
+            if (m.next) {
+                matches[m.next][m.nextPos] = `Menunggu ${matchId.toUpperCase()}`;
+                matches[m.next].s1 = null;
+                matches[m.next].s2 = null;
+                clearDownstream(m.next);
+            }
+            if (m.loserNext) {
+                matches[m.loserNext][m.loserPos] = `Kalah ${matchId.toUpperCase()}`;
+                matches[m.loserNext].s1 = null;
+                matches[m.loserNext].s2 = null;
+                clearDownstream(m.loserNext);
+            }
+        }
+
+        function resetTournament() {
+            if(confirm("Apakah Anda yakin ingin mereset seluruh skor dan mengosongkan bagan? Data yang tersimpan juga akan terhapus secara permanen.")) {
+                matches = JSON.parse(JSON.stringify(bracketConfig));
+                assignTeams(Array(11).fill(null));
+                localStorage.removeItem('poesakaBracketState_2026'); // Hapus memori penyimpanan
+                renderBracket();
+                drawLines();
+            }
+        }
+
+        function renderBracket(isAnimating = false) {
+            const wrapper = document.getElementById('matches-wrapper');
+            wrapper.innerHTML = '';
+
+            for (const [id, match] of Object.entries(matches)) {
+                // Determine styling based on match type
+                let borderColor = 'border-slate-200';
+                let headerBg = 'bg-slate-100 text-slate-600';
+                
+                if (match.isFinal) {
+                    borderColor = 'border-brand-red shadow-md';
+                    headerBg = 'bg-brand-red text-white';
+                } else if (match.isThird) {
+                    borderColor = 'border-indigo-300';
+                    headerBg = 'bg-indigo-100 text-indigo-800';
+                }
+
+                // Add blinking effect class during animation
+                let cardClass = isAnimating ? 'shuffling' : '';
+
+                const isT1Waiting = match.t1 === null || match.t1.startsWith('Menunggu') || match.t1.startsWith('Kalah');
+                const isT2Waiting = match.t2 === null || match.t2.startsWith('Menunggu') || match.t2.startsWith('Kalah');
+
+                const t1Class = isT1Waiting ? 'text-slate-400 italic font-normal' : 'text-slate-800 font-semibold';
+                const t2Class = isT2Waiting ? 'text-slate-400 italic font-normal' : 'text-slate-800 font-semibold';
+
+                const cardHtml = `
+                    <div class="absolute w-[220px] bg-white rounded-lg border-2 ${borderColor} overflow-hidden ${cardClass}" 
+                         style="left: ${match.x}px; top: ${match.y}px;">
+                        
+                        <!-- Header -->
+                        <div class="px-3 py-1.5 text-[11px] font-bold ${headerBg} flex justify-between items-center uppercase tracking-wider">
+                            <span>${match.label}</span>
+                            ${match.isFinal ? '<i data-lucide="trophy" class="w-3 h-3"></i>' : ''}
+                        </div>
+                        
+                        <!-- Team 1 Row -->
+                        <div class="flex border-b border-slate-100 h-[32px]">
+                            <div class="flex-1 px-3 py-1.5 text-xs truncate ${t1Class} flex items-center" title="${match.t1 || ''}">
+                                ${match.t1 || '---'}
+                            </div>
+                            <div class="w-[40px] border-l border-slate-100 bg-slate-50">
+                                <input type="number" min="0" class="w-full h-full bg-transparent text-center text-xs font-bold focus:outline-none focus:bg-brand-light focus:text-brand-darkred" 
+                                       value="${match.s1 !== null ? match.s1 : ''}" 
+                                       onchange="updateScore('${id}', 's1', this.value)"
+                                       ${isAnimating ? 'disabled' : ''}>
+                            </div>
+                        </div>
+                        
+                        <!-- Team 2 Row -->
+                        <div class="flex h-[32px]">
+                            <div class="flex-1 px-3 py-1.5 text-xs truncate ${t2Class} flex items-center" title="${match.t2 || ''}">
+                                ${match.t2 || '---'}
+                            </div>
+                            <div class="w-[40px] border-l border-slate-100 bg-slate-50">
+                                <input type="number" min="0" class="w-full h-full bg-transparent text-center text-xs font-bold focus:outline-none focus:bg-brand-light focus:text-brand-darkred" 
+                                       value="${match.s2 !== null ? match.s2 : ''}" 
+                                       onchange="updateScore('${id}', 's2', this.value)"
+                                       ${isAnimating ? 'disabled' : ''}>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                wrapper.innerHTML += cardHtml;
+            }
+            
+            // Re-initialize icons for newly injected HTML
+            lucide.createIcons();
+        }
+
+        function drawLines() {
+            const svg = document.getElementById('lines-canvas');
+            svg.innerHTML = '';
+            
+            const cardW = 220;
+            const cardH = 88; // 24 header + 32 + 32
+            
+            // Connections array: [sourceMatch, targetMatch, targetPos(t1/t2), isLoserPath]
+            const connections = [
+                ['m1', 'm4', 't1'],
+                ['m2', 'm5', 't1'],
+                ['m3', 'm6', 't1'],
+                ['m4', 'm8', 't1'],
+                ['m5', 'm8', 't2'],
+                ['m6', 'm9', 't1'],
+                ['m7', 'm9', 't2'],
+                ['m8', 'm10', 't1'],
+                ['m9', 'm10', 't2'],
+                ['m8', 'm11', 't1', true], 
+                ['m9', 'm11', 't2', true]
+            ];
+
+            connections.forEach(conn => {
+                const src = matches[conn[0]];
+                const tgt = matches[conn[1]];
+                const isLoser = conn[3];
+
+                if (!src || !tgt) return;
+
+                // Starting point (Right middle of source card)
+                let startX = src.x + cardW;
+                let startY = src.y + (cardH / 2);
+                
+                if(isLoser) {
+                    // For loser bracket, draw from bottom of source card to avoid overlapping
+                    startX = src.x + (cardW / 2);
+                    startY = src.y + cardH;
+                }
+
+                // Ending point (Left edge of target card)
+                let endX = tgt.x;
+                // If it goes to t1, align with top half. If t2, align with bottom half
+                let endY = tgt.y + (conn[2] === 't1' ? 40 : 72);
+
+                let lineColor = isLoser ? '#c7d2fe' : '#cbd5e1'; // Indigo-ish for losers, slate for winners
+                let strokeWidth = '2';
+
+                // Highlight active path if winner is decided
+                if (!isLoser && src.s1 !== null && src.s2 !== null && src.s1 !== src.s2) {
+                    lineColor = '#fca5a5'; // Red tint for active path
+                    strokeWidth = '3';
+                }
+
+                // Create Bezier Curve
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                
+                if (isLoser) {
+                    // Custom curve for 3rd place line
+                    const d = `M ${startX} ${startY} C ${startX} ${startY + 60}, ${endX - 50} ${endY}, ${endX} ${endY}`;
+                    path.setAttribute('d', d);
+                    path.setAttribute('stroke-dasharray', '5,5'); // Dashed line for loser path
+                } else {
+                    // Smooth S-curve for normal progression
+                    const d = `M ${startX} ${startY} C ${startX + 30} ${startY}, ${endX - 30} ${endY}, ${endX} ${endY}`;
+                    path.setAttribute('d', d);
+                }
+                
+                path.setAttribute('fill', 'transparent');
+                path.setAttribute('stroke', lineColor);
+                path.setAttribute('stroke-width', strokeWidth);
+                
+                svg.appendChild(path);
+            });
+        }
+
+        // Drag to scroll functionality
+        const scrollContainer = document.getElementById('scroll-container');
+        let isDown = false;
+        let startX, startY, scrollLeft, scrollTop;
+
+        scrollContainer.addEventListener('mousedown', (e) => {
+            if(e.target.tagName.toLowerCase() === 'input') return; // Don't drag if clicking input
+            isDown = true;
+            startX = e.pageX - scrollContainer.offsetLeft;
+            startY = e.pageY - scrollContainer.offsetTop;
+            scrollLeft = scrollContainer.scrollLeft;
+            scrollTop = scrollContainer.scrollTop;
+        });
+        scrollContainer.addEventListener('mouseleave', () => { isDown = false; });
+        scrollContainer.addEventListener('mouseup', () => { isDown = false; });
+        scrollContainer.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - scrollContainer.offsetLeft;
+            const y = e.pageY - scrollContainer.offsetTop;
+            const walkX = (x - startX) * 1.5;
+            const walkY = (y - startY) * 1.5;
+            scrollContainer.scrollLeft = scrollLeft - walkX;
+            scrollContainer.scrollTop = scrollTop - walkY;
+        });
+
+        // Initial Setup
+        window.onload = () => {
+            const savedState = localStorage.getItem('poesakaBracketState_2026');
+            
+            if (savedState) {
+                // Jika ada data tersimpan di browser, muat data tersebut
+                matches = JSON.parse(savedState);
+                renderBracket();
+                drawLines();
+            } else {
+                // Jika belum ada data (baru pertama kali buka), muat bagan kosong
+                assignTeams(Array(11).fill(null)); 
+                renderBracket();
+                drawLines();
+            }
+        };
+    </script>
+</body>
+</html>

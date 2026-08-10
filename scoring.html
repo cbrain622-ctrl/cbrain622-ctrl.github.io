@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Lembar Skor Badminton - 11 Tim</title>
+    <style>
+        /* Pengaturan Dasar & Kertas A4 */
+        *, *::before, *::after { box-sizing: border-box; }
+        body { 
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
+            font-size: 10pt; 
+            color: #1a202c; 
+            margin: 0; 
+            padding: 20px; 
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .a4-page {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            padding: 15mm 12mm;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        @page { 
+            size: A4 portrait; 
+            margin: 15mm 12mm; 
+        }
+
+        @media print {
+            body { 
+                background: none; 
+                padding: 0; 
+                display: block; 
+            }
+            .a4-page { 
+                width: 100%; 
+                min-height: auto; 
+                box-shadow: none; 
+                padding: 0; 
+            }
+            .no-print { display: none !important; }
+        }
+
+        /* */
+        .header { 
+            text-align: center; 
+            border-bottom: 3px solid #2b6cb0; 
+            padding-bottom: 10px; 
+            margin-bottom: 10px; 
+        }
+        .header h1 { margin: 0; font-size: 16pt; color: #2b6cb0; text-transform: uppercase; letter-spacing: 1px; }
+        .header h2 { margin: 4px 0 0 0; font-size: 13pt; color: #e53e3e; text-transform: uppercase; letter-spacing: 1px; }
+        .header p { margin: 4px 0 0 0; font-size: 9pt; font-weight: bold; color: #4a5568; }
+        
+        /* */
+        .match-info { width: 100%; margin-bottom: 10px; border-collapse: collapse; }
+        .match-info td { border: 1px solid #cbd5e0; padding: 4px 8px; font-size: 8.5pt; width: 25%; }
+        .match-info strong { color: #2d3748; }
+
+        .teams { width: 100%; border-collapse: collapse; margin-bottom: 10px; table-layout: fixed; }
+        .teams td.team-box { border: 2px solid #2b6cb0; vertical-align: top; padding: 0; width: 49%; }
+        .team-spacer { width: 2%; }
+
+        /* */
+        .team-header { background: #2b6cb0; color: #fff; text-align: center; font-weight: bold; padding: 5px; font-size: 10.5pt; margin-bottom: 4px; }
+        .team-header.red { background: #c53030; }
+        .player-info { padding: 0 10px; }
+        .label { font-weight: bold; font-size: 8pt; display: block; margin-bottom: 2px; color: #2d3748; }
+        .line { border-bottom: 1px dashed #a0aec0; width: 100%; height: 10px; margin-bottom: 6px; }
+        
+        /* */
+        .bureau-section { padding: 0 10px 6px 10px; }
+        .asisten-title { font-weight: bold; color: #2b6cb0; margin-top: 4px; margin-bottom: 2px; font-size: 7.5pt; border-bottom: 1px solid #e2e8f0; padding-bottom: 2px; }
+        .asisten-title.red { color: #c53030; }
+        .bureau-table { width: 100%; border-collapse: collapse; }
+        .bureau-table td { padding: 1px 0; vertical-align: top; border: none; font-size: 7pt; line-height: 1.1; }
+        .bureau-table td.box-col { width: 12px; }
+        .box { width: 8px; height: 8px; border: 1px solid #718096; display: inline-block; margin-top: 1px; }
+
+        /* */
+        .score-container { border: 1px solid #cbd5e0; margin-bottom: 8px; padding: 6px 8px; }
+        .game-title { font-size: 9pt; font-weight: bold; color: #2b6cb0; margin-bottom: 4px; border-left: 4px solid #ed8936; padding-left: 6px; }
+        .score-grid { width: 100%; border-collapse: collapse; text-align: center; font-size: 7.5pt; }
+        .score-grid td { border: 1px solid #e2e8f0; width: 5.8%; height: 15px; color: #4a5568; }
+        .score-grid .team-col { width: 13%; font-weight: bold; background: #edf2f7; text-align: left; padding-left: 5px; font-size: 7.5pt; }
+        
+        /* */
+        .signatures { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        .signatures td { text-align: center; vertical-align: bottom; height: 50px; width: 33.33%; font-size: 8pt; }
+        .signatures .sig-line { border-top: 1px solid #2d3748; margin: 0 20px; padding-top: 4px; font-weight: bold; }
+
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2b6cb0;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .print-btn:hover { background: #1a365d; }
+    </style>
+</head>
+<body>
+
+    <!-- Tombol Print yang akan hilang saat dicetak -->
+    <button class="print-btn no-print" onclick="window.print()">🖨️ Cetak Lembar / Save PDF</button>
+
+    <div class="a4-page">
+        <!-- -->
+        <div class="header">
+            <h1>Lembar Skor Pertandingan Bulu Tangkis</h1>
+            <h2>POESAKA SETDA TAHUN 2026</h2>
+            <p>TURNAMEN ANTAR BIRO - LINGKUP SEKRETARIAT DAERAH</p>
+        </div>
+
+        <table class="match-info">
+            <tr>
+                <td><strong>Tanggal:</strong> .....................................</td>
+                <td><strong>Waktu:</strong> .....................................</td>
+                <td><strong>Lapangan:</strong> .....................................</td>
+                <td><strong>No. Match:</strong> .....................................</td>
+            </tr>
+            <tr>
+                <td><strong>Kategori:</strong> [ ] Tunggal &nbsp; [ ] Ganda</td>
+                <td><strong>Putaran:</strong> .....................................</td>
+                <td colspan="2"><strong>Umpire:</strong> .....................................</td>
+            </tr>
+        </table>
+
+        <!-- -->
+        <table class="teams">
+            <tr>
+                <td class="team-box">
+                    <div class="team-header">TIM / PEMAIN A</div>
+                    <div class="player-info">
+                        <span class="label">Nama Pemain 1:</span>
+                        <div class="line"></div>
+                        <span class="label">Nama Pemain 2 (Ganda):</span>
+                        <div class="line"></div>
+                    </div>
+                    <div class="bureau-section">
+                        <div class="asisten-title">Asisten Pemerintahan dan Kesra (Asisten I)</div>
+                        <table class="bureau-table">
+                            <tr><td class="box-col"><div class="box"></div></td><td>Biro Pemerintahan dan Otonomi Daerah</td></tr>
+                            <tr><td class="box-col"><div class="box"></div></td><td>Biro Hukum dan Hak Asasi Manusia (HAM)</td></tr>
+                            <tr><td class="box-col"><div class="box"></div></td><td>Biro Kesejahteraan Rakyat</td></tr>
+                        </table>
+                        
+                        <div class="asisten-title">Asisten Perekonomian dan Pembangunan (Asisten II)</div>
+                        <table class="bureau-table">
+                            <tr><td class="box-col"><div class="box"></div></td><td>Biro Perekonomian</td></tr>
+                            <tr><td class="box-col"><div class="box"></div></td><td>Biro BUMD, Investasi, dan Adm. Pembangunan</td></tr>
+                            <tr><td class="box-col"><div class="box"></div></td><td>Biro Pengadaan Barang dan Jasa</td></tr>
+                        </table>
+
+                        <div class="asisten-title">Asisten Administrasi Umum (Asisten III)</div>
+                        <table class="bureau-table">
+                            <tr><td class="box-col"><div class="box"></div></td><td>Biro Organisasi</td></tr>
+                            <tr><td class="box-col"><div class="box"></div></td><td>Biro Umum</td></tr>
+                            <tr><td class="box-col"><div class="box"></div></td><td>Biro Administrasi Pimpinan</td></tr>
+                        </table>
+
+                        <!-- UPDATE: Bagian Tim Pendukung Ditambahkan Di Sini -->
+                        <div class="asisten-title">Tim Pendukung</div>
+                        <table class="bureau-table">
+                            <tr><td class="box-col"><div class="box"></div></td><td>Keamanan Setda Provinsi Jawa Barat</td></tr>
+                            <tr><td class="box-col"><div class="box"></div></td><td>Petugas Kebersihan</td></tr>
+                        </table>
+                    </div>
+                </td>
+                
+                <td class="team-spacer"></td>
+                
+                <!-- -->
+                <td class="team-box">
+                    <div class="team-header red">TIM / PEMAIN B</div>
+                    <div class="player-info">
+                        <span class="label">Nama Pemain 1:</span>
+                        <div class="line"></div>
+                        <span class="label">Nama Pemain 2 (Ganda):</span>
+                        <div class="line"></div>
+                    </div>
+                    <div class="bureau-section">
+                        <div class="asisten-title red">Asisten Pemerintahan dan Kesra (Asisten I)</div>
+                        <table class="bureau-table">
+                            <tr><td class="box-col"><div class="box"></div></td><td>Biro Pemerintahan dan Otonomi Daerah</td></tr>
+                            <tr><td class="box-col"><div class="box"></div></td><td>Biro Hukum dan Hak Asasi Manusia (HAM)</td></tr>
+                            <tr><td class="box-col"><div class="box"></div></td><td>Biro Kesejahteraan Rakyat</td></tr>
+                        </table>
+                        
+                        <div class="asisten-title red">Asisten Perekonomian dan Pembangunan (Asisten II)</div>
+                        <table class="bureau-table">
+                            <tr><td class="box-col"><div class="box"></div></td><td>Biro Perekonomian</td></tr>
+                            <tr><td class="box-col"><div class="box"></div></td><td>Biro BUMD, Investasi, dan Adm. Pembangunan</td></tr>
+                            <tr><td class="box-col"><div class="box"></div></td><td>Biro Pengadaan Barang dan Jasa</td></tr>
+                        </table>
+
+                        <div class="asisten-title red">Asisten Administrasi Umum (Asisten III)</div>
+                        <table class="bureau-table">
+                            <tr><td class="box-col"><div class="box"></div></td><td>Biro Organisasi</td></tr>
+                            <tr><td class="box-col"><div class="box"></div></td><td>Biro Umum</td></tr>
+                            <tr><td class="box-col"><div class="box"></div></td><td>Biro Administrasi Pimpinan</td></tr>
+                        </table>
+                        
+                        <!-- UPDATE: Bagian Tim Pendukung Ditambahkan Di Sini -->
+                        <div class="asisten-title red">Tim Pendukung</div>
+                        <table class="bureau-table">
+                            <tr><td class="box-col"><div class="box"></div></td><td>Keamanan Setda Provinsi Jawa Barat</td></tr>
+                            <tr><td class="box-col"><div class="box"></div></td><td>Petugas Kebersihan</td></tr>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <!-- -->
+        <script>
+            // Fungsi kecil untuk generate tabel angka skor 1-30
+            function generateScoreGrid(gameNumber) {
+                document.write(`
+                <div class="score-container">
+                    <div class="game-title">GIM ${gameNumber}</div>
+                    <table class="score-grid">
+                        <tr>
+                            <td class="team-col" rowspan="2">TIM A</td>
+                            ${Array.from({length: 15}, (_, i) => `<td>${i+1}</td>`).join('')}
+                        </tr>
+                        <tr>
+                            ${Array.from({length: 15}, (_, i) => `<td>${i+16}</td>`).join('')}
+                        </tr>
+                        <tr>
+                            <td class="team-col" rowspan="2" style="border-top: 2px solid #a0aec0;">TIM B</td>
+                            ${Array.from({length: 15}, (_, i) => `<td style="border-top: 2px solid #a0aec0;">${i+1}</td>`).join('')}
+                        </tr>
+                        <tr>
+                            ${Array.from({length: 15}, (_, i) => `<td>${i+16}</td>`).join('')}
+                        </tr>
+                    </table>
+                </div>
+                `);
+            }
+            
+            generateScoreGrid(1);
+            generateScoreGrid(2);
+            generateScoreGrid(3);
+        </script>
+
+        <!-- -->
+        <table class="signatures">
+            <tr>
+                <td>
+                    <div class="sig-line">Kapten / Pemain Tim A</div>
+                </td>
+                <td>
+                    <div class="sig-line">Wasit (Umpire)</div>
+                </td>
+                <td>
+                    <div class="sig-line">Kapten / Pemain Tim B</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+</html>
