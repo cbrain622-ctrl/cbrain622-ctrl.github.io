@@ -270,6 +270,11 @@
         .add-form input{padding:9px;font-size:16px;border:1px solid #9aa5b1;border-radius:6px;box-sizing:border-box;width:100%;font-family:inherit}
         .af-row{display:flex;gap:6px}.af-row>*{flex:1;min-width:0}
         .af-head{font-weight:bold}.af-err{color:#b3261e;min-height:14px}
+        /* KELOLA TOKO */
+        .store-tools{background:#f0faf3;border-color:#b7dfc4}
+        .st-cur{font-weight:normal;color:#456}
+        .store-tools .at-btns .st-del{border-color:#d9534f;color:#b3261e}
+        .store-tools .at-btns button:disabled{opacity:.45;cursor:not-allowed}
         #af-ok{background:#0056b3;color:#fff}
         #pdf-container td.c-prod{position:relative}
         .rm-prod{position:absolute;right:2px;top:50%;transform:translateY(-50%);width:20px;height:20px;padding:0;font-size:11px;line-height:1;border:1px solid #d9534f;border-radius:50%;background:#fff;color:#d9534f;cursor:pointer}
@@ -284,7 +289,7 @@
         /* PRINT SETTINGS */
         @media print {
             body { padding: 0; background: #fff; }
-            .controls, .field-info, .tabs, .target-info, .mode-switch, .mode-hint, .val-summary, .add-tools, .rm-prod, .cat-bar, .io-bar { display: none !important; }
+            .controls, .field-info, .tabs, .target-info, .mode-switch, .mode-hint, .val-summary, .add-tools, .store-tools, .rm-prod, .cat-bar, .io-bar { display: none !important; }
             #pdf-container .input-line { border-bottom: none !important; }
             #pdf-container input[readonly], #pdf-container textarea[readonly] { background: transparent !important; }
             #pdf-container input::placeholder { color: transparent !important; }
@@ -315,6 +320,20 @@
         <button type="button" onclick="toggleAllCats(false)">📁 Tutup semua</button>
     </div>
     <div id="outlet-tabs" class="tabs"></div>
+    <div id="store-tools" class="add-tools store-tools">
+        <div class="at-title">🏬 Kelola toko <span id="st-cur" class="st-cur"></span></div>
+        <div class="at-btns">
+            <button type="button" id="st-add" onclick="openStoreAdd()">＋ Tambahkan Toko</button>
+            <button type="button" id="st-del" class="st-del" onclick="deleteStore()">🗑 Hapus Toko Ini</button>
+            <button type="button" id="st-restore" style="display:none" onclick="restoreStores()">↩ Pulihkan toko bawaan</button>
+        </div>
+        <div id="store-form" class="add-form" style="display:none">
+            <div class="af-head">Nama toko baru</div>
+            <input id="sf-name" type="text" maxlength="60" autocomplete="off" placeholder="mis. BORMA - BUAH BATU BANDUNG">
+            <div class="af-err" id="sf-err"></div>
+            <div class="af-row"><button type="button" id="sf-ok" onclick="submitStoreAdd()">Simpan toko</button><button type="button" onclick="closeStoreAdd()">Batal</button></div>
+        </div>
+    </div>
     <details id="target-info" class="target-info"></details>
     <div id="add-tools" class="add-tools">
         <div class="at-title">➕ Tambah produk baru ke kategori:</div>
@@ -478,6 +497,7 @@
             const el = document.getElementById('outlet-tabs');
             el.innerHTML = OUTLETS.map((o, i) => '<button type="button" class="tab' + (i === curOutlet ? ' on' : '') +
                 '" onclick="switchOutlet(' + i + ')" title="' + esc(o.name) + '">' + esc(shortName(o.name)) + '</button>').join('');
+            if (typeof renderStoreTools === 'function') renderStoreTools();
         }
         function renderTargetInfo() {
             const o = OUTLETS[curOutlet];
@@ -1265,7 +1285,7 @@
                 all.outlets[OUTLETS[curOutlet].no] = { v: 2, stateData, headerData: getHeaderData(), tg: curTargets };
                 const n = Object.keys(all.outlets).length;
                 const name = 'Backup_Sellout_' + ymd() + '.json';
-                const json = JSON.stringify({ app: APP_ID, format: 1, periode: PERIODE, exportedAt: new Date().toISOString(), outlets: all.outlets });
+                const json = JSON.stringify({ app: APP_ID, format: 1, periode: PERIODE, exportedAt: new Date().toISOString(), customOutlets: storeCfg.custom.map(c => ({ no: c.no, name: c.name })), outlets: all.outlets });
                 try {
                     const file = new File([json], name, { type: 'application/json' });
                     if (navigator.canShare && navigator.canShare({ files: [file] }) && window.matchMedia && window.matchMedia('(pointer:coarse)').matches) {
@@ -1314,19 +1334,32 @@
             if (!obj || obj.app !== APP_ID || !obj.outlets || typeof obj.outlets !== 'object' || Array.isArray(obj.outlets)) {
                 alert('File ini bukan file backup dari form sellout ini.'); return;
             }
+            const extra = [], clash = new Set();
+            if (Array.isArray(obj.customOutlets)) obj.customOutlets.slice(0, 50).forEach(c => {
+                if (!c || !isCustomNo(c.no) || typeof c.name !== 'string' || !c.name.trim()) return;
+                const nm = c.name.trim().replace(/\s+/g, ' ').slice(0, 80);
+                const ex = OUTLETS.find(o => o.no === c.no);
+                if (ex) { if (ex.name.toUpperCase() !== nm.toUpperCase()) clash.add(String(c.no)); return; }
+                if (extra.some(o => o.no === c.no)) return;
+                extra.push({ no: c.no, name: nm, t: emptyTargets(), custom: true });
+            });
+            extra.forEach(o => OUTLETS.push(o)); // sementara; dibatalkan lewat rollback() bila import tidak jadi
+            const rollback = () => extra.forEach(o => { const k = OUTLETS.indexOf(o); if (k >= 0) OUTLETS.splice(k, 1); });
             const good = {}, names = [];
             let skipped = 0;
             Object.keys(obj.outlets).forEach(no => {
+                if (clash.has(no)) { skipped++; return; }
                 const i = OUTLETS.findIndex(o => String(o.no) === no);
                 const rec = i < 0 ? null : sanitizeRec(i, obj.outlets[no]);
                 if (!rec) { skipped++; return; }
                 good[OUTLETS[i].no] = rec; names.push(OUTLETS[i].name);
             });
-            if (!names.length) { alert('Tidak ada data outlet yang valid di file ini.'); return; }
+            if (!names.length) { rollback(); alert('Tidak ada data outlet yang valid di file ini.'); return; }
             let msg = 'Import ' + names.length + ' outlet:\n- ' + names.join('\n- ') + '\n\nData outlet yang sama di perangkat ini akan DITIMPA.' +
                 ' Outlet lain tidak berubah.' + (skipped ? '\n(' + skipped + ' data dilewati karena tidak valid.)' : '');
+            if (extra.length) msg += '\n\nToko tambahan yang ikut dipulihkan:\n- ' + extra.map(o => o.name).join('\n- ');
             if (obj.periode && obj.periode !== PERIODE) msg += '\n\nPERHATIAN: periode di file "' + String(obj.periode).slice(0, 40) + '" berbeda dengan form ini.';
-            if (!confirm(msg + '\n\nLanjutkan?')) return;
+            if (!confirm(msg + '\n\nLanjutkan?')) { rollback(); return; }
             saveData(false); // amankan isian terakhir yang belum tersimpan
             const raw = storageGet(STORAGE_KEY);
             if (raw) storageSet(STORAGE_KEY + '_before_import', raw); // cadangan otomatis sebelum menimpa
@@ -1334,9 +1367,11 @@
             Object.keys(good).forEach(no => { all.outlets[no] = good[no]; });
             all.active = curOutlet;
             if (!storageSet(STORAGE_KEY, JSON.stringify(all))) {
+                rollback();
                 alert('Import gagal disimpan (penyimpanan browser tidak tersedia atau penuh). Data di layar tidak berubah.');
                 return;
             }
+            if (extra.length) { extra.forEach(o => storeCfg.custom.push({ no: o.no, name: o.name })); saveStoreCfg(); }
             loadOutlet(curOutlet);
             setStatus('✔ Import berhasil: ' + names.length + ' outlet');
             alert('Import berhasil: ' + names.length + ' outlet.' + (skipped ? '\n' + skipped + ' data dilewati.' : ''));
@@ -1378,7 +1413,116 @@
             window.addEventListener('afterprint', applyZoom);
         }
 
-        window.onload = function () { initMode(); loadData(); initValidation(); initAddTools(); initTargetCard(); initCatCards(); initAutosave(); initFieldInfo(); };
+        // =====================================================
+        //  KELOLA TOKO: tambah / hapus toko (outlet)
+        // =====================================================
+        const STORE_CFG_KEY = STORAGE_KEY + '_stores';
+        const BASE_OUTLETS = OUTLETS.slice(); // toko bawaan dari PDF (tidak pernah diubah)
+        let storeCfg = { custom: [], removed: [] }; // custom: toko tambahan; removed: nomor toko bawaan yang dihapus
+        function emptyTargets() { return { co: 0, soya: 0, rbo: 0, sesame: 0, oliv: 0, stb: 0, ftb: null, flour: 0, rice: 0 }; }
+        function isCustomNo(n) { return Number.isInteger(n) && n >= 1000000; }
+        function readStoreCfg() {
+            const out = { custom: [], removed: [] };
+            const raw = storageGet(STORE_CFG_KEY);
+            if (!raw) return out;
+            try {
+                const p = JSON.parse(raw);
+                if (p && Array.isArray(p.custom)) p.custom.forEach(c => {
+                    if (c && isCustomNo(c.no) && typeof c.name === 'string' && c.name.trim() && !out.custom.some(x => x.no === c.no))
+                        out.custom.push({ no: c.no, name: c.name.trim().slice(0, 80) });
+                });
+                if (p && Array.isArray(p.removed)) p.removed.forEach(n => {
+                    if (BASE_OUTLETS.some(o => o.no === n) && !out.removed.includes(n)) out.removed.push(n);
+                });
+            } catch (e) { console.error('Daftar toko rusak, memakai bawaan:', e); }
+            return out;
+        }
+        function saveStoreCfg() { return storageSet(STORE_CFG_KEY, JSON.stringify(storeCfg)); }
+        function rebuildOutlets() {
+            OUTLETS.length = 0;
+            BASE_OUTLETS.forEach(o => { if (!storeCfg.removed.includes(o.no)) OUTLETS.push(o); });
+            storeCfg.custom.forEach(c => OUTLETS.push({ no: c.no, name: c.name, t: emptyTargets(), custom: true }));
+            if (!OUTLETS.length) { storeCfg.removed = []; BASE_OUTLETS.forEach(o => OUTLETS.push(o)); } // pengaman: minimal 1 toko
+        }
+        function applyStoreCfg() { // dipanggil sekali saat halaman dibuka, sebelum loadData()
+            try { storeCfg = readStoreCfg(); rebuildOutlets(); }
+            catch (e) { console.error(e); storeCfg = { custom: [], removed: [] }; rebuildOutlets(); }
+        }
+        function renderStoreTools() {
+            const cur = document.getElementById('st-cur');
+            if (cur && OUTLETS[curOutlet]) cur.textContent = '— aktif: ' + OUTLETS[curOutlet].name;
+            const del = document.getElementById('st-del');
+            if (del) del.disabled = OUTLETS.length < 2;
+            const rs = document.getElementById('st-restore');
+            if (rs) rs.style.display = storeCfg.removed.length ? '' : 'none';
+        }
+        function openStoreAdd() {
+            document.getElementById('sf-name').value = '';
+            document.getElementById('sf-err').textContent = '';
+            document.getElementById('store-form').style.display = 'flex';
+            document.getElementById('sf-name').focus();
+        }
+        function closeStoreAdd() { document.getElementById('store-form').style.display = 'none'; }
+        function newStoreNo() { // nomor unik (berbasis waktu) agar tidak bentrok antar perangkat saat import
+            let n = Math.floor(Date.now() / 1000);
+            const used = new Set(OUTLETS.map(o => o.no).concat(storeCfg.custom.map(c => c.no)));
+            while (used.has(n)) n++;
+            return n;
+        }
+        function submitStoreAdd() {
+            const err = m => { document.getElementById('sf-err').textContent = m; };
+            const name = document.getElementById('sf-name').value.trim().replace(/\s+/g, ' ').toUpperCase();
+            if (!name) return err('Nama toko wajib diisi.');
+            if (OUTLETS.some(o => o.name.toUpperCase() === name)) return err('Toko dengan nama ini sudah ada.');
+            saveData(false); // amankan isian toko yang sedang dibuka
+            const no = newStoreNo();
+            OUTLETS.push({ no, name, t: emptyTargets(), custom: true });
+            storeCfg.custom.push({ no, name });
+            const ok = saveStoreCfg();
+            closeStoreAdd();
+            loadOutlet(OUTLETS.length - 1);
+            const ti = document.getElementById('target-info'); if (ti) ti.open = true;
+            window.scrollTo(0, 0);
+            setStatus(ok ? 'Toko "' + name + '" ditambahkan. Isi target di kartu 🎯 bila ada.'
+                         : '⚠ Toko ditambahkan, tetapi daftar toko tidak bisa disimpan di browser ini.', !ok);
+        }
+        function deleteStore() {
+            if (OUTLETS.length < 2) { alert('Tidak bisa dihapus: minimal harus ada satu toko.'); return; }
+            const o = OUTLETS[curOutlet];
+            saveDOMToState();
+            const hasData = stateData.some(c => c.items.some(it => it.slice(3, 9).some(v => String(v).trim() !== '')));
+            if (!confirm('Hapus toko "' + o.name + '"' + (hasData ? ' beserta SEMUA isian penjualannya' : '') + '?' +
+                '\n\nData toko ini akan hilang dari perangkat ini. Bila perlu cadangan, batalkan lalu tekan ⬇️ Export Data dulu.')) return;
+            clearTimeout(autosaveTimer);
+            const all = readAll();
+            delete all.outlets[o.no];
+            if (o.custom) storeCfg.custom = storeCfg.custom.filter(c => c.no !== o.no);
+            else if (!storeCfg.removed.includes(o.no)) storeCfg.removed.push(o.no);
+            const next = Math.min(curOutlet, OUTLETS.length - 2);
+            OUTLETS.splice(curOutlet, 1);
+            const ok1 = storageSet(STORAGE_KEY, JSON.stringify(all)), ok2 = saveStoreCfg(), ok = ok1 && ok2;
+            loadOutlet(next);
+            window.scrollTo(0, 0);
+            setStatus(ok ? 'Toko "' + o.name + '" dihapus.' : '⚠ Toko dihapus di layar, tetapi perubahan tidak bisa disimpan di browser ini.', !ok);
+        }
+        function restoreStores() {
+            if (!storeCfg.removed.length) return;
+            if (!confirm('Pulihkan ' + storeCfg.removed.length + ' toko bawaan yang pernah dihapus? Isian lama toko itu tidak kembali; yang kembali hanya target awal dari PDF.')) return;
+            saveData(false);
+            const keepNo = OUTLETS[curOutlet].no;
+            storeCfg.removed = [];
+            const ok = saveStoreCfg();
+            rebuildOutlets();
+            loadOutlet(Math.max(0, OUTLETS.findIndex(x => x.no === keepNo)));
+            setStatus(ok ? 'Toko bawaan dipulihkan.' : '⚠ Dipulihkan di layar, tetapi tidak bisa disimpan di browser ini.', !ok);
+        }
+        function initStoreTools() {
+            const inp = document.getElementById('sf-name');
+            if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submitStoreAdd(); } });
+            renderStoreTools();
+        }
+
+        window.onload = function () { initMode(); applyStoreCfg(); loadData(); initValidation(); initAddTools(); initTargetCard(); initCatCards(); initAutosave(); initFieldInfo(); initStoreTools(); };
     </script>
 </body>
 </html>
