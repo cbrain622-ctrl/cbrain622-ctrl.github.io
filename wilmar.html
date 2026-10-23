@@ -286,10 +286,18 @@
         .ti-msg{color:#b3261e;min-height:14px;font-size:11px;margin-top:2px}
         #ti-reset{margin-top:8px;padding:9px 12px;font-size:12px;border:1px solid #b58900;border-radius:6px;background:#fff;color:#7a6200;cursor:pointer;font-family:inherit}
 
+        /* PILIH BULAN */
+        .month-bar{display:flex;align-items:center;gap:8px;max-width:1050px;margin:0 auto 6px;background:#fff;border:2px solid #6f42c1;border-radius:8px;padding:8px 10px;box-sizing:border-box}
+        .month-bar label{font-size:13px;font-weight:bold;color:#4b2a8a;white-space:nowrap}
+        .month-bar select{flex:1;min-width:0;padding:9px;font-size:16px;font-weight:bold;border:1px solid #9aa5b1;border-radius:6px;background:#fff;color:#000;font-family:inherit}
+        .month-bar button{padding:9px 13px;font-size:14px;border:1px solid #6f42c1;border-radius:6px;background:#fff;color:#6f42c1;cursor:pointer;font-family:inherit}
+        .month-bar button:disabled{opacity:.4;cursor:not-allowed}
+        .month-note{max-width:1050px;margin:0 auto 8px;font-size:11px;color:#555;text-align:center}
+
         /* PRINT SETTINGS */
         @media print {
             body { padding: 0; background: #fff; }
-            .controls, .field-info, .tabs, .target-info, .mode-switch, .mode-hint, .val-summary, .add-tools, .store-tools, .rm-prod, .cat-bar, .io-bar { display: none !important; }
+            .controls, .field-info, .tabs, .target-info, .mode-switch, .mode-hint, .val-summary, .add-tools, .store-tools, .rm-prod, .cat-bar, .io-bar, .month-bar, .month-note { display: none !important; }
             #pdf-container .input-line { border-bottom: none !important; }
             #pdf-container input[readonly], #pdf-container textarea[readonly] { background: transparent !important; }
             #pdf-container input::placeholder { color: transparent !important; }
@@ -315,6 +323,13 @@
         <button type="button" id="btn-mode-print" onclick="setMode('print')">🖨️ Mode Print Out (Halaman Penuh)</button>
     </div>
     <div id="mode-hint" class="mode-hint"></div>
+    <div id="month-bar" class="month-bar">
+        <button type="button" id="mb-prev" onclick="stepMonth(-1)" aria-label="Bulan sebelumnya">◀</button>
+        <label for="month-select">📅 Bulan</label>
+        <select id="month-select" onchange="changeMonth(this.value)"></select>
+        <button type="button" id="mb-next" onclick="stepMonth(1)" aria-label="Bulan berikutnya">▶</button>
+    </div>
+    <div class="month-note">Isian dan target tiap bulan tersimpan terpisah. Bulan bertanda ● sudah ada isiannya.</div>
     <div id="cat-bar" class="cat-bar">
         <button type="button" onclick="toggleAllCats(true)">📂 Buka semua kategori</button>
         <button type="button" onclick="toggleAllCats(false)">📁 Tutup semua</button>
@@ -476,7 +491,7 @@
 
         let stateData = [];
         let curOutlet = 0;
-        const SPG_NAME = 'RAHMAWATI', PERIODE = '1 - 31 Oktober 2026';
+        const SPG_NAME = 'RAHMAWATI';
         // Target Oktober 2026 (sumber: Rincian_Target_Nilam_Nur_Anjani_Oktober_2026.pdf)
         const OUTLETS = [
             {no:74, name:'BORMA - CIPADUNG BANDUNG',    t:{co:19697.4,  soya:8,    rbo:0,   sesame:1.16,  oliv:0, stb:50,  ftb:null, flour:4050,   rice:0}},
@@ -489,7 +504,7 @@
             {no:88, name:'GRIYA - DINASTI KIARA CONDONG',t:{co:0,       soya:0,    rbo:0,   sesame:0,     oliv:0, stb:0,   ftb:null, flour:0,      rice:0}}
         ];
         function catTargets(o) { return catFrom(o.t); }
-        function defaultHeader(i) { return { spg: SPG_NAME, outlet: OUTLETS[i].name, periode: PERIODE }; }
+        function defaultHeader(i) { return { spg: SPG_NAME, outlet: OUTLETS[i].name, periode: periodeText(curMonth) }; }
         function shortName(n) { return n.replace(/ BANDUNG$/, '').replace(/^(\w+) - /, '$1 '); }
         function fmtN(n) { return n == null ? '—' : n.toLocaleString('id-ID', { maximumFractionDigits: 2 }); }
 
@@ -501,12 +516,12 @@
         }
         function renderTargetInfo() {
             const o = OUTLETS[curOutlet];
-            document.getElementById('target-info').innerHTML = '<summary>🎯 Target Oktober 2026 — ' + esc(o.name) + ' (bisa diedit)</summary><div class="ti-grid">' +
+            document.getElementById('target-info').innerHTML = '<summary>🎯 Target ' + esc(monthLabel(curMonth)) + ' — ' + esc(o.name) + ' (bisa diedit)</summary><div class="ti-grid">' +
                 TK.map(r => '<label><span>' + r[1] + '</span><input class="ti-in" data-k="' + r[0] + '" type="text" inputmode="decimal" autocomplete="off" placeholder="—" value="' +
                     (curTargets[r[0]] == null ? '' : curTargets[r[0]]) + '"></label>').join('') +
                 '</div><div class="ti-cat" id="ti-cat"></div><div class="ti-msg" id="ti-msg"></div>' +
                 '<div class="ti-note">Mengubah angka di kartu ini otomatis memperbarui kolom TARGET kategori: SOFT OIL = SR Soya + SR RBO + Sesame + Olivoila; FLOUR = Flour + Tepung Beras. Kolom TARGET di tabel juga bisa diedit langsung. Kosong berarti belum ada target (dihitung 0).</div>' +
-                '<button type="button" id="ti-reset">↩ Kembalikan ke target PDF</button>';
+                '<button type="button" id="ti-reset">' + (curMonth === LEGACY_YM ? '↩ Kembalikan ke target PDF' : '↩ Kosongkan semua target') + '</button>';
             updateCatLine(catFrom(curTargets));
         }
 
@@ -530,7 +545,7 @@
             if (cl.contains('week-input') && row) weekNo = Array.from(row.querySelectorAll('.week-input')).indexOf(el) + 1;
             if (id === 'inp_spg') return ['Nama lengkap SPG yang membuat laporan.', 'NAMA SPG: tulis nama lengkap SPG yang membuat laporan.'];
             if (id === 'inp_outlet') return ['Nama toko / outlet tempat SPG bertugas.', 'OUTLET: tulis nama toko / outlet tempat SPG bertugas.'];
-            if (id === 'inp_periode') return ['Periode laporan, mis. 1 - 31 Oktober 2026.', 'PERIODE: tulis periode laporan, mis. 1 - 31 Oktober 2026.'];
+            if (id === 'inp_periode') return ['Periode laporan, mis. ' + periodeText(curMonth) + '.', 'PERIODE: tulis periode laporan, mis. ' + periodeText(curMonth) + '.'];
             if (id.startsWith('gt_')) return ['Otomatis: grand total semua produk.', 'GRAND TOTAL: terisi otomatis dari seluruh produk. Tidak perlu diisi.'];
             const prod = row && row.querySelector('.prod-name')
                 ? [row.querySelector('.prod-name').value, row.querySelector('.prod-size').value].filter(Boolean).join(' ') : '';
@@ -685,7 +700,81 @@
         // =====================================================
         //  PENYIMPANAN DATA (anti-error)
         // =====================================================
-        const STORAGE_KEY = 'spg_wilmar_okt2026_v1';
+        // =====================================================
+        //  BULAN LAPORAN: tiap bulan punya penyimpanan sendiri.
+        //  Oktober 2026 tetap memakai kunci lama, jadi data lama terbaca apa adanya.
+        // =====================================================
+        const LEGACY_YM = '2026-10';
+        const MONTH_KEY = 'spg_wilmar_month';
+        const MONTHS_ID = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        const MONTH_LIST = (function () {
+            const l = [];
+            for (let y = 2026; y <= 2027; y++) for (let m = 1; m <= 12; m++) l.push(y + '-' + String(m).padStart(2, '0'));
+            return l;
+        })();
+        function storageKeyFor(ym) { return ym === LEGACY_YM ? 'spg_wilmar_okt2026_v1' : 'spg_wilmar_' + ym + '_v1'; }
+        let curMonth = LEGACY_YM;
+        let STORAGE_KEY = storageKeyFor(LEGACY_YM);
+
+        function parseYM(ym) {
+            const m = /^(\d{4})-(\d{2})$/.exec(String(ym));
+            if (!m || +m[2] < 1 || +m[2] > 12) return null;
+            return { y: +m[1], mo: +m[2] };
+        }
+        function monthLabel(ym) { const p = parseYM(ym); return p ? MONTHS_ID[p.mo - 1] + ' ' + p.y : String(ym); }
+        function periodeText(ym) { // mis. "1 - 30 November 2026"
+            const p = parseYM(ym);
+            return p ? '1 - ' + new Date(p.y, p.mo, 0).getDate() + ' ' + MONTHS_ID[p.mo - 1] + ' ' + p.y : '';
+        }
+        // Apakah satu data outlet berisi angka penjualan / target yang sudah diisi?
+        function recHasInput(rec, ym) {
+            if (!rec || typeof rec !== 'object') return false;
+            if (Array.isArray(rec.stateData) && rec.stateData.some(c => c && Array.isArray(c.items) &&
+                c.items.some(it => Array.isArray(it) && it.slice(3, 9).some(v => String(v == null ? '' : v).trim() !== '')))) return true;
+            return ym !== LEGACY_YM && !!rec.tg && typeof rec.tg === 'object' && Object.keys(rec.tg).some(k => rec.tg[k] != null);
+        }
+        function monthHasData(ym) {
+            const raw = storageGet(storageKeyFor(ym));
+            if (!raw) return false;
+            try {
+                const p = JSON.parse(raw);
+                return !!(p && p.outlets && typeof p.outlets === 'object' && Object.keys(p.outlets).some(no => recHasInput(p.outlets[no], ym)));
+            } catch (e) { return false; }
+        }
+        function renderMonthBar() {
+            const sel = document.getElementById('month-select');
+            if (!sel) return;
+            sel.innerHTML = MONTH_LIST.map(ym => '<option value="' + ym + '"' + (ym === curMonth ? ' selected' : '') + '>' +
+                esc(monthLabel(ym)) + (monthHasData(ym) ? ' ●' : '') + '</option>').join('');
+            const idx = MONTH_LIST.indexOf(curMonth);
+            const prev = document.getElementById('mb-prev'), next = document.getElementById('mb-next');
+            if (prev) prev.disabled = idx <= 0;
+            if (next) next.disabled = idx < 0 || idx >= MONTH_LIST.length - 1;
+        }
+        function switchMonthVars(ym) {
+            curMonth = ym;
+            STORAGE_KEY = storageKeyFor(ym);
+            storageSet(MONTH_KEY, ym);
+        }
+        function changeMonth(ym) {
+            if (!MONTH_LIST.includes(ym) || ym === curMonth) { renderMonthBar(); return; }
+            clearTimeout(autosaveTimer);
+            if (!saveData(false) && !confirm('Isian bulan ' + monthLabel(curMonth) + ' TIDAK bisa disimpan di browser ini.\nPindah bulan akan menghapus isian yang ada di layar.\n\nTetap pindah?')) { renderMonthBar(); return; }
+            switchMonthVars(ym);
+            loadOutlet(curOutlet);
+            const ti = document.getElementById('target-info');
+            if (ti && curMonth !== LEGACY_YM && Object.keys(curTargets).every(k => curTargets[k] == null)) ti.open = true; // target bulan baru masih kosong
+            window.scrollTo(0, 0);
+            setStatus('Bulan ' + monthLabel(ym) + ' dibuka' + (monthHasData(ym) ? ' (isian tersimpan dimuat).' : ' (belum ada isian). Isi target di kartu 🎯.'));
+        }
+        function stepMonth(d) {
+            const i = MONTH_LIST.indexOf(curMonth) + d;
+            if (i >= 0 && i < MONTH_LIST.length) changeMonth(MONTH_LIST[i]);
+        }
+        function initMonth() {
+            const saved = storageGet(MONTH_KEY);
+            if (saved && MONTH_LIST.includes(saved)) { curMonth = saved; STORAGE_KEY = storageKeyFor(saved); }
+        }
         const ITEM_LEN = 10; // [produk, kemasan, size, w1..w5, value, penanda produk tambahan]
 
         function storageGet(key) {
@@ -731,8 +820,8 @@
         }
         function defaultState() {
             const st = normalizeState(JSON.parse(JSON.stringify(defaultData)));
-            const ct = catTargets(OUTLETS[curOutlet]);
-            st.forEach(c => { if (ct[c.name] !== undefined) c.target = String(ct[c.name]); });
+            const ct = catTargetText(curTargets);
+            st.forEach(c => { if (ct[c.name] !== undefined) c.target = ct[c.name]; });
             return st;
         }
 
@@ -819,6 +908,8 @@
                 stateData = defaultState(); setHeaderData(defaultHeader(i)); renderTable();
             }
             renderTabs(); renderTargetInfo(); validateAll();
+            const pIn = document.getElementById('inp_periode'); if (pIn) pIn.placeholder = 'mis. ' + periodeText(curMonth);
+            renderMonthBar();
             const all = readAll(); all.active = i; storageSet(STORAGE_KEY, JSON.stringify(all));
             setStatus(loaded ? 'Data outlet ' + OUTLETS[i].name + ' dimuat.' : '');
         }
@@ -837,7 +928,7 @@
         }
 
         function resetData() {
-            if (confirm('Hapus semua isian outlet ' + OUTLETS[curOutlet].name + ' dan kembalikan ke target awal?')) {
+            if (confirm('Hapus semua isian outlet ' + OUTLETS[curOutlet].name + ' untuk bulan ' + monthLabel(curMonth) + (curMonth === LEGACY_YM ? ' dan kembalikan ke target awal?' : ' dan kosongkan target?'))) {
                 const all = readAll();
                 delete all.outlets[OUTLETS[curOutlet].no];
                 storageSet(STORAGE_KEY, JSON.stringify(all));
@@ -948,7 +1039,7 @@
 
             const opt = {
                 margin:       PDF_MARGIN_MM,
-                filename:     'Laporan_Sellout_' + OUTLETS[curOutlet].name.replace(/[^A-Za-z0-9]+/g, '_') + '.pdf',
+                filename:     'Laporan_Sellout_' + monthLabel(curMonth).replace(/\s+/g, '_') + '_' + OUTLETS[curOutlet].name.replace(/[^A-Za-z0-9]+/g, '_') + '.pdf',
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 3, useCORS: true, scrollX: 0, scrollY: 0, x: 0, y: 0, windowWidth: pageWpx },
                 jsPDF:        { unit: 'mm', format: PDF_PAPER_MM, orientation: PDF_ORIENTATION },
@@ -1168,9 +1259,11 @@
         const TK = [['co', 'Cooking Oil (L)'], ['soya', 'SR Soya'], ['rbo', 'SR RBO'], ['sesame', 'Sesame'], ['oliv', 'Olivoila'],
                     ['stb', 'Sania Tepung Beras'], ['ftb', 'Fortune Tepung Beras'], ['flour', 'Flour'], ['rice', 'Rice']];
         let curTargets = {};
-        function defTargets(i) { return JSON.parse(JSON.stringify(OUTLETS[i].t)); }
-        function loadTg(i, tg) {
-            const d = defTargets(i);
+        function blankTargets() { const o = {}; TK.forEach(r => { o[r[0]] = null; }); return o; }
+        // Oktober 2026 memakai angka dari PDF; bulan lain mulai kosong (diisi lewat kartu 🎯)
+        function defTargets(i, ym) { return (ym || curMonth) === LEGACY_YM ? JSON.parse(JSON.stringify(OUTLETS[i].t)) : blankTargets(); }
+        function loadTg(i, tg, ym) {
+            const d = defTargets(i, ym);
             if (!tg || typeof tg !== 'object') return d;
             TK.forEach(r => {
                 if (r[0] in tg) {
@@ -1186,18 +1279,26 @@
             const sum = ks => round2(ks.reduce((a, k) => a + (+t[k] || 0), 0));
             return { 'COOKING OIL': sum(['co']), 'SOFT OIL': sum(['soya', 'rbo', 'sesame', 'oliv']), 'FLOUR': sum(['flour', 'stb', 'ftb']), 'RICE': sum(['rice']) };
         }
+        // Teks target kategori untuk kolom TARGET: kosong bila semua angka sumbernya belum diisi
+        function catTargetText(t) {
+            const ct = catFrom(t);
+            const src = { 'COOKING OIL': ['co'], 'SOFT OIL': ['soya', 'rbo', 'sesame', 'oliv'], 'FLOUR': ['flour', 'stb', 'ftb'], 'RICE': ['rice'] };
+            const out = {};
+            Object.keys(ct).forEach(n => { out[n] = src[n].every(k => t[k] == null) ? '' : String(ct[n]); });
+            return out;
+        }
         function updateCatLine(ct) {
             const el = document.getElementById('ti-cat');
             if (el) el.textContent = '→ Target kategori: COOKING OIL ' + fmtN(ct['COOKING OIL']) + ' | SOFT OIL ' + fmtN(ct['SOFT OIL']) +
                 ' | FLOUR ' + fmtN(ct['FLOUR']) + ' | RICE ' + fmtN(ct['RICE']);
         }
         function applyCategoryTargets() {
-            const ct = catFrom(curTargets);
+            const ct = catFrom(curTargets), tx = catTargetText(curTargets);
             stateData.forEach((c, ci) => {
                 if (ct[c.name] === undefined) return;
                 const t = document.querySelector('#tbody-' + ci + ' .target-input');
-                if (t) { t.value = String(ct[c.name]); t.dataset.amb = ''; }
-                c.target = String(ct[c.name]);
+                if (t) { t.value = tx[c.name]; t.dataset.amb = ''; }
+                c.target = tx[c.name];
             });
             updateCatLine(ct); calculateAll(); validateAll(); saveData(false);
         }
@@ -1230,7 +1331,7 @@
             });
             box.addEventListener('click', e => {
                 if (e.target.id !== 'ti-reset') return;
-                if (!confirm('Kembalikan semua target outlet ini ke angka dari PDF?')) return;
+                if (!confirm(curMonth === LEGACY_YM ? 'Kembalikan semua target outlet ini ke angka dari PDF?' : 'Kosongkan semua target outlet ini untuk bulan ' + monthLabel(curMonth) + '?')) return;
                 curTargets = defTargets(curOutlet);
                 renderTargetInfo();
                 applyCategoryTargets();
@@ -1284,8 +1385,8 @@
                 // data outlet yang sedang dibuka ikut dibawa walau penyimpanan browser tidak tersedia
                 all.outlets[OUTLETS[curOutlet].no] = { v: 2, stateData, headerData: getHeaderData(), tg: curTargets };
                 const n = Object.keys(all.outlets).length;
-                const name = 'Backup_Sellout_' + ymd() + '.json';
-                const json = JSON.stringify({ app: APP_ID, format: 1, periode: PERIODE, exportedAt: new Date().toISOString(), customOutlets: storeCfg.custom.map(c => ({ no: c.no, name: c.name })), outlets: all.outlets });
+                const name = 'Backup_Sellout_' + curMonth + '_' + ymd() + '.json';
+                const json = JSON.stringify({ app: APP_ID, format: 1, month: curMonth, periode: periodeText(curMonth), exportedAt: new Date().toISOString(), customOutlets: storeCfg.custom.map(c => ({ no: c.no, name: c.name })), outlets: all.outlets });
                 try {
                     const file = new File([json], name, { type: 'application/json' });
                     if (navigator.canShare && navigator.canShare({ files: [file] }) && window.matchMedia && window.matchMedia('(pointer:coarse)').matches) {
@@ -1314,7 +1415,7 @@
             r.readAsText(f);
         }
         // Bersihkan satu data outlet dari file: batasi panjang teks, cek nama kategori, target dikembalikan ke angka valid
-        function sanitizeRec(i, rec) {
+        function sanitizeRec(i, rec, ym) {
             if (!rec || typeof rec !== 'object' || !isValidState(rec.stateData)) return null;
             const st = normalizeState(rec.stateData);
             if (st.length !== defaultData.length || !st.every((c, k) => c.name === defaultData[k].name)) return null;
@@ -1326,7 +1427,7 @@
             });
             if (rec.v !== 2) migrateV2(st);
             const h = rec.headerData && typeof rec.headerData === 'object' ? rec.headerData : {};
-            return { v: 2, stateData: st, headerData: { spg: cap(h.spg, 60), outlet: cap(h.outlet, 80), periode: cap(h.periode, 60) }, tg: loadTg(i, rec.tg) };
+            return { v: 2, stateData: st, headerData: { spg: cap(h.spg, 60), outlet: cap(h.outlet, 80), periode: cap(h.periode, 60) }, tg: loadTg(i, rec.tg, ym) };
         }
         function applyImport(text) {
             let obj;
@@ -1334,6 +1435,9 @@
             if (!obj || obj.app !== APP_ID || !obj.outlets || typeof obj.outlets !== 'object' || Array.isArray(obj.outlets)) {
                 alert('File ini bukan file backup dari form sellout ini.'); return;
             }
+            // File lama (tanpa tanda bulan) berasal dari form Oktober 2026
+            const fileYM = obj.month == null ? LEGACY_YM : (typeof obj.month === 'string' && MONTH_LIST.includes(obj.month) ? obj.month : null);
+            if (!fileYM) { alert('Bulan di file backup ini tidak dikenali.'); return; }
             const extra = [], clash = new Set();
             if (Array.isArray(obj.customOutlets)) obj.customOutlets.slice(0, 50).forEach(c => {
                 if (!c || !isCustomNo(c.no) || typeof c.name !== 'string' || !c.name.trim()) return;
@@ -1350,17 +1454,19 @@
             Object.keys(obj.outlets).forEach(no => {
                 if (clash.has(no)) { skipped++; return; }
                 const i = OUTLETS.findIndex(o => String(o.no) === no);
-                const rec = i < 0 ? null : sanitizeRec(i, obj.outlets[no]);
+                const rec = i < 0 ? null : sanitizeRec(i, obj.outlets[no], fileYM);
                 if (!rec) { skipped++; return; }
                 good[OUTLETS[i].no] = rec; names.push(OUTLETS[i].name);
             });
             if (!names.length) { rollback(); alert('Tidak ada data outlet yang valid di file ini.'); return; }
-            let msg = 'Import ' + names.length + ' outlet:\n- ' + names.join('\n- ') + '\n\nData outlet yang sama di perangkat ini akan DITIMPA.' +
+            let msg = 'Import ' + names.length + ' outlet untuk bulan ' + monthLabel(fileYM) + ':\n- ' + names.join('\n- ') + '\n\nData outlet yang sama di perangkat ini akan DITIMPA.' +
                 ' Outlet lain tidak berubah.' + (skipped ? '\n(' + skipped + ' data dilewati karena tidak valid.)' : '');
             if (extra.length) msg += '\n\nToko tambahan yang ikut dipulihkan:\n- ' + extra.map(o => o.name).join('\n- ');
-            if (obj.periode && obj.periode !== PERIODE) msg += '\n\nPERHATIAN: periode di file "' + String(obj.periode).slice(0, 40) + '" berbeda dengan form ini.';
+            if (fileYM !== curMonth) msg += '\n\nForm akan pindah ke bulan ' + monthLabel(fileYM) + '. Data bulan ' + monthLabel(curMonth) + ' tidak berubah.';
             if (!confirm(msg + '\n\nLanjutkan?')) { rollback(); return; }
             saveData(false); // amankan isian terakhir yang belum tersimpan
+            const prevYM = curMonth;
+            if (fileYM !== curMonth) switchMonthVars(fileYM);
             const raw = storageGet(STORAGE_KEY);
             if (raw) storageSet(STORAGE_KEY + '_before_import', raw); // cadangan otomatis sebelum menimpa
             const all = readAll();
@@ -1368,6 +1474,7 @@
             all.active = curOutlet;
             if (!storageSet(STORAGE_KEY, JSON.stringify(all))) {
                 rollback();
+                if (curMonth !== prevYM) switchMonthVars(prevYM);
                 alert('Import gagal disimpan (penyimpanan browser tidak tersedia atau penuh). Data di layar tidak berubah.');
                 return;
             }
@@ -1416,7 +1523,7 @@
         // =====================================================
         //  KELOLA TOKO: tambah / hapus toko (outlet)
         // =====================================================
-        const STORE_CFG_KEY = STORAGE_KEY + '_stores';
+        const STORE_CFG_KEY = 'spg_wilmar_okt2026_v1_stores'; // daftar toko dipakai bersama semua bulan
         const BASE_OUTLETS = OUTLETS.slice(); // toko bawaan dari PDF (tidak pernah diubah)
         let storeCfg = { custom: [], removed: [] }; // custom: toko tambahan; removed: nomor toko bawaan yang dihapus
         function emptyTargets() { return { co: 0, soya: 0, rbo: 0, sesame: 0, oliv: 0, stb: 0, ftb: null, flour: 0, rice: 0 }; }
@@ -1491,8 +1598,8 @@
             const o = OUTLETS[curOutlet];
             saveDOMToState();
             const hasData = stateData.some(c => c.items.some(it => it.slice(3, 9).some(v => String(v).trim() !== '')));
-            if (!confirm('Hapus toko "' + o.name + '"' + (hasData ? ' beserta SEMUA isian penjualannya' : '') + '?' +
-                '\n\nData toko ini akan hilang dari perangkat ini. Bila perlu cadangan, batalkan lalu tekan ⬇️ Export Data dulu.')) return;
+            if (!confirm('Hapus toko "' + o.name + '"' + (hasData ? ' beserta SEMUA isian penjualannya bulan ' + monthLabel(curMonth) : '') + '?' +
+                '\n\nToko ini akan hilang dari daftar di SEMUA bulan. Isian bulan lain tidak dihapus, tetapi ikut tersembunyi. Bila perlu cadangan, batalkan lalu tekan ⬇️ Export Data dulu.')) return;
             clearTimeout(autosaveTimer);
             const all = readAll();
             delete all.outlets[o.no];
@@ -1507,7 +1614,7 @@
         }
         function restoreStores() {
             if (!storeCfg.removed.length) return;
-            if (!confirm('Pulihkan ' + storeCfg.removed.length + ' toko bawaan yang pernah dihapus? Isian lama toko itu tidak kembali; yang kembali hanya target awal dari PDF.')) return;
+            if (!confirm('Pulihkan ' + storeCfg.removed.length + ' toko bawaan yang pernah dihapus? Isian yang sudah terhapus tidak kembali (target awal dari PDF hanya untuk Oktober 2026); isian bulan lain yang masih tersimpan akan terlihat lagi.')) return;
             saveData(false);
             const keepNo = OUTLETS[curOutlet].no;
             storeCfg.removed = [];
@@ -1522,7 +1629,7 @@
             renderStoreTools();
         }
 
-        window.onload = function () { initMode(); applyStoreCfg(); loadData(); initValidation(); initAddTools(); initTargetCard(); initCatCards(); initAutosave(); initFieldInfo(); initStoreTools(); };
+        window.onload = function () { initMode(); applyStoreCfg(); initMonth(); loadData(); initValidation(); initAddTools(); initTargetCard(); initCatCards(); initAutosave(); initFieldInfo(); initStoreTools(); };
     </script>
 </body>
 </html>
