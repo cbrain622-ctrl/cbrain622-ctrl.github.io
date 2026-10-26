@@ -355,8 +355,7 @@
         .app-top .target-info[open] > summary,.app-top .add-tools[open] > summary,.app-top .val-summary[open] > summary{border-bottom:1px solid rgba(0,0,0,.08)}
         .app-top .target-info > :not(summary){margin-left:14px;margin-right:14px}
         .app-top .target-info > .ti-grid{margin-top:12px}
-        .app-top .target-info > #ti-reset{margin-bottom:14px}
-        .app-top .target-info > .ti-note{margin-bottom:0}
+        .app-top .target-info > .ti-note{margin-bottom:14px}
         .app-top .target-info > .ti-cat{margin-top:12px}
         .app-top .val-summary > :not(summary){margin-left:14px;margin-right:14px}
         .app-top .val-summary > button:last-child{margin-bottom:12px}
@@ -641,8 +640,7 @@
                 TK.map(r => '<label><span>' + r[1] + '</span><input class="ti-in" data-k="' + r[0] + '" type="text" inputmode="decimal" autocomplete="off" placeholder="—" value="' +
                     (curTargets[r[0]] == null ? '' : curTargets[r[0]]) + '"></label>').join('') +
                 '</div><div class="ti-cat" id="ti-cat"></div><div class="ti-msg" id="ti-msg"></div>' +
-                '<div class="ti-note">Mengubah angka di kartu ini otomatis memperbarui kolom TARGET kategori: SOFT OIL = SR Soya + SR RBO + Sesame + Olivoila; FLOUR = Flour + Tepung Beras. Kolom TARGET di tabel juga bisa diedit langsung. Kosong berarti belum ada target (dihitung 0).</div>' +
-                '<button type="button" id="ti-reset">' + (curMonth === LEGACY_YM ? '↩ Kembalikan ke target PDF' : '↩ Kosongkan semua target') + '</button>';
+                '<div class="ti-note">Mengubah angka di kartu ini otomatis memperbarui kolom TARGET kategori: SOFT OIL = SR Soya + SR RBO + Sesame + Olivoila; FLOUR = Flour + Tepung Beras. Kolom TARGET di tabel juga bisa diedit langsung. Kosong berarti belum ada target (dihitung 0).</div>';
             updateCatLine(catFrom(curTargets));
         }
 
