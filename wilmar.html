@@ -294,10 +294,100 @@
         .month-bar button:disabled{opacity:.4;cursor:not-allowed}
         .month-note{max-width:1050px;margin:0 auto 8px;font-size:11px;color:#555;text-align:center}
 
+        /* =========================================================
+           TAMPILAN APLIKASI (bagian atas form) - hanya gaya layar.
+           Tabel laporan / hasil PDF tidak diubah.
+           ========================================================= */
+        :root{--ui-line:#d8dee6;--ui-text:#1f2d3d;--ui-muted:#667085;--ui-primary:#0056b3;--ui-primary-d:#00448c;--ui-danger:#c0392b}
+        body{padding:14px}
+        .app-top{max-width:1050px;margin:0 auto 12px;display:flex;flex-direction:column;gap:10px;box-sizing:border-box;
+            font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:13px;color:var(--ui-text)}
+        .app-top > *{margin:0;max-width:none;box-sizing:border-box}
+        .app-top button,.app-top select,.app-top input{font-family:inherit}
+        .app-head,.controls,.tool-group,.tabs-card{background:#fff;border:1px solid var(--ui-line);border-radius:12px;padding:12px 14px;box-shadow:0 1px 2px rgba(16,24,40,.05)}
+        .sec-label{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--ui-muted);margin-bottom:8px}
+
+        /* judul + bulan */
+        .app-head{display:grid;grid-template-columns:1fr minmax(300px,430px);grid-template-areas:"title bar" "title note";gap:6px 18px;align-items:center}
+        .app-title{grid-area:title;display:flex;align-items:center;gap:12px;min-width:0}
+        .app-ico{display:flex;align-items:center;justify-content:center;width:42px;height:42px;flex:0 0 42px;border-radius:10px;background:#e8f1fb;font-size:22px}
+        .app-title b{display:block;font-size:17px;line-height:1.25;color:#10233a}
+        .app-title small{display:block;margin-top:2px;font-size:12px;color:var(--ui-muted)}
+        .app-head .month-bar{grid-area:bar;margin:0;padding:0;border:0;background:none;border-radius:0}
+        .app-head .month-note{grid-area:note;margin:0;text-align:left;font-size:11px;color:var(--ui-muted)}
+        .app-head .month-bar label{color:var(--ui-muted)}
+        .app-head .month-bar select{border-color:var(--ui-line);background:#f8fafc}
+        .app-head .month-bar button{border-color:var(--ui-line);background:#f8fafc;color:var(--ui-primary)}
+
+        /* tombol utama */
+        .app-top .controls,body.mode-input .app-top .controls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0;text-align:center}
+        .app-top .controls button,body.mode-input .app-top .controls button{margin:0;padding:12px 8px;font-size:13px;font-weight:700;border-radius:9px;border:1px solid transparent;color:#fff;line-height:1.2}
+        .controls .save-btn{background:var(--ui-primary)}
+        .controls .pdf-btn{background:#344054}
+        .app-top .controls .reset-btn{background:#fff;color:var(--ui-danger);border-color:#e3b5b0}
+        .controls button:hover{opacity:1;filter:brightness(1.08)}
+        .app-top .controls .save-status,body.mode-input .app-top .controls .save-status{grid-column:1/-1;margin:0;text-align:center;font-size:12px;color:var(--ui-muted);min-height:0}
+        .controls .save-status:empty{display:none}
+
+        /* cadangan + tampilan */
+        .tools-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+        .tool-group{padding:10px 14px 12px}
+        .tool-group .io-bar,.tool-group .mode-switch{display:flex;gap:6px;margin:0;max-width:none}
+        .tool-group button{flex:1;padding:10px 6px;font-size:12px;font-weight:600;border:1px solid var(--ui-line);border-radius:8px;background:#f8fafc;color:var(--ui-text);cursor:pointer}
+        .tool-group button:hover{background:#eef3f9}
+        .tool-group .mode-switch button.on{background:var(--ui-primary);border-color:var(--ui-primary);color:#fff}
+        .tool-group .mode-hint{margin:8px 0 0;text-align:left;font-size:11px;color:var(--ui-muted)}
+        .app-top .cat-bar{gap:8px}
+        .app-top .cat-bar button{padding:11px 6px;font-size:12px;font-weight:600;border:1px solid var(--ui-line);border-radius:9px;background:#fff;color:var(--ui-text);box-shadow:0 1px 2px rgba(16,24,40,.05)}
+
+        /* pilih toko */
+        .tabs-card .tabs{padding:0;background:none;justify-content:flex-start;gap:6px}
+        .tabs-card .tab{padding:8px 13px;font-size:12px;font-weight:600;border-color:var(--ui-line);background:#f8fafc}
+        .tabs-card .tab:hover{background:#eef3f9}
+        .tabs-card .tab.on{background:var(--ui-primary);border-color:var(--ui-primary);color:#fff}
+
+        /* panel lipat: target, kelola toko, tambah produk, ringkasan masalah */
+        .app-top .target-info,.app-top .add-tools,.app-top .val-summary{border-radius:12px;padding:0;box-shadow:0 1px 2px rgba(16,24,40,.05);overflow:hidden}
+        .app-top .target-info > summary,.app-top .add-tools > summary,.app-top .val-summary > summary{list-style:none;cursor:pointer;padding:12px 14px;font-weight:700;position:relative;padding-right:38px;-webkit-tap-highlight-color:transparent}
+        .app-top summary::-webkit-details-marker{display:none}
+        .app-top .target-info > summary::after,.app-top .add-tools > summary::after,.app-top .val-summary > summary::after{content:"▾";position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:15px;transition:transform .15s}
+        .app-top details:not([open]) > summary::after{transform:translateY(-50%) rotate(-90deg)}
+        .app-top .target-info[open] > summary,.app-top .add-tools[open] > summary,.app-top .val-summary[open] > summary{border-bottom:1px solid rgba(0,0,0,.08)}
+        .app-top .target-info > :not(summary){margin-left:14px;margin-right:14px}
+        .app-top .target-info > .ti-grid{margin-top:12px}
+        .app-top .target-info > #ti-reset{margin-bottom:14px}
+        .app-top .target-info > .ti-note{margin-bottom:0}
+        .app-top .target-info > .ti-cat{margin-top:12px}
+        .app-top .val-summary > :not(summary){margin-left:14px;margin-right:14px}
+        .app-top .val-summary > button:last-child{margin-bottom:12px}
+        .app-top .add-tools .at-title{margin:0;font-size:13px}
+        .app-top .add-tools .st-cur{font-weight:500;font-size:12px}
+        .app-top .at-body{padding:12px 14px 14px}
+        .app-top .at-sub{font-size:12px;color:var(--ui-muted);margin-bottom:8px}
+        .app-top .at-btns button,.app-top .add-form button{border-radius:8px;font-weight:600}
+        .app-top .add-form{padding:10px;border:1px dashed #b9c4d3;border-radius:10px;background:rgba(255,255,255,.7)}
+
+        /* petunjuk isian (melayang) + kertas laporan */
+        .field-info{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;border-radius:10px;font-size:12px}
+        #pdf-container{border-radius:8px;box-shadow:0 2px 10px rgba(16,24,40,.08);margin-bottom:28px}
+
+        @media (max-width:820px){
+            body{padding:8px}
+            .app-top{gap:8px}
+            .app-head{grid-template-columns:1fr;grid-template-areas:"title" "bar" "note";gap:10px}
+            .app-title b{font-size:15px}
+            .tools-row{grid-template-columns:1fr;gap:8px}
+            .app-top .controls,body.mode-input .app-top .controls{grid-template-columns:1fr 1fr}
+            .controls .save-btn{grid-column:1/-1}
+            .app-top .controls button,body.mode-input .app-top .controls button{padding:13px 8px}
+            .tabs-card .tab{flex:1 1 calc(50% - 6px);text-align:center;white-space:normal}
+            .app-head .month-bar label{display:none}
+        }
+
         /* PRINT SETTINGS */
         @media print {
             body { padding: 0; background: #fff; }
-            .controls, .field-info, .tabs, .target-info, .mode-switch, .mode-hint, .val-summary, .add-tools, .store-tools, .rm-prod, .cat-bar, .io-bar, .month-bar, .month-note { display: none !important; }
+            .controls, .field-info, .tabs, .target-info, .mode-switch, .mode-hint, .val-summary, .add-tools, .store-tools, .rm-prod, .cat-bar, .io-bar, .month-bar, .month-note, .app-top { display: none !important; }
             #pdf-container .input-line { border-bottom: none !important; }
             #pdf-container input[readonly], #pdf-container textarea[readonly] { background: transparent !important; }
             #pdf-container input::placeholder { color: transparent !important; }
@@ -307,65 +397,96 @@
 </head>
 <body>
 
-    <div class="controls">
-        <button onclick="saveData()">💾 Simpan Data</button>
-        <button class="pdf-btn" onclick="exportPDF()">📄 Cetak / Export PDF</button>
-        <button class="reset-btn" onclick="resetData()">🔄 Reset Outlet Ini</button>
-        <div id="save-status" class="save-status"></div>
-    </div>
-    <div class="io-bar">
-        <button type="button" onclick="exportData()">⬇️ Export Data</button>
-        <button type="button" onclick="importData()">⬆️ Import Data</button>
-        <input type="file" id="import-file" accept=".json,application/json" style="display:none" onchange="onImportFile(event)">
-    </div>
-    <div class="mode-switch">
-        <button type="button" id="btn-mode-input" onclick="setMode('input')">📱 Mode Input (HP)</button>
-        <button type="button" id="btn-mode-print" onclick="setMode('print')">🖨️ Mode Print Out (Halaman Penuh)</button>
-    </div>
-    <div id="mode-hint" class="mode-hint"></div>
-    <div id="month-bar" class="month-bar">
-        <button type="button" id="mb-prev" onclick="stepMonth(-1)" aria-label="Bulan sebelumnya">◀</button>
-        <label for="month-select">📅 Bulan</label>
-        <select id="month-select" onchange="changeMonth(this.value)"></select>
-        <button type="button" id="mb-next" onclick="stepMonth(1)" aria-label="Bulan berikutnya">▶</button>
-    </div>
-    <div class="month-note">Isian dan target tiap bulan tersimpan terpisah. Bulan bertanda ● sudah ada isiannya.</div>
-    <div id="cat-bar" class="cat-bar">
-        <button type="button" onclick="toggleAllCats(true)">📂 Buka semua kategori</button>
-        <button type="button" onclick="toggleAllCats(false)">📁 Tutup semua</button>
-    </div>
-    <div id="outlet-tabs" class="tabs"></div>
-    <div id="store-tools" class="add-tools store-tools">
-        <div class="at-title">🏬 Kelola toko <span id="st-cur" class="st-cur"></span></div>
-        <div class="at-btns">
-            <button type="button" id="st-add" onclick="openStoreAdd()">＋ Tambahkan Toko</button>
-            <button type="button" id="st-del" class="st-del" onclick="deleteStore()">🗑 Hapus Toko Ini</button>
-            <button type="button" id="st-restore" style="display:none" onclick="restoreStores()">↩ Pulihkan toko bawaan</button>
-        </div>
-        <div id="store-form" class="add-form" style="display:none">
-            <div class="af-head">Nama toko baru</div>
-            <input id="sf-name" type="text" maxlength="60" autocomplete="off" placeholder="mis. BORMA - BUAH BATU BANDUNG">
-            <div class="af-err" id="sf-err"></div>
-            <div class="af-row"><button type="button" id="sf-ok" onclick="submitStoreAdd()">Simpan toko</button><button type="button" onclick="closeStoreAdd()">Batal</button></div>
-        </div>
-    </div>
-    <details id="target-info" class="target-info"></details>
-    <div id="add-tools" class="add-tools">
-        <div class="at-title">➕ Tambah produk baru ke kategori:</div>
-        <div class="at-btns" id="at-btns"></div>
-        <div id="add-form" class="add-form" style="display:none">
-            <div class="af-head" id="af-head"></div>
-            <input id="af-name" type="text" maxlength="60" autocomplete="off" placeholder="Nama produk, mis. SANIA Royale Rice Bran Oil">
-            <div class="af-row">
-                <input id="af-kem" type="text" list="af-kem-list" maxlength="20" autocomplete="off" placeholder="Kemasan: BOTOL / POUCH / PACK">
-                <input id="af-size" type="text" maxlength="12" autocomplete="off" placeholder="Size: 1L / 500ML / 1 KG">
+    <div class="app-top">
+        <div class="app-head">
+            <div class="app-title">
+                <span class="app-ico">📋</span>
+                <div><b>Laporan Sellout SPG Wilmar</b><small>Pilih bulan dan toko, isi data, lalu cetak PDF</small></div>
             </div>
-            <datalist id="af-kem-list"><option value="POUCH"><option value="BOTOL"><option value="JERIGEN"><option value="PET"><option value="PILLOW PACK"><option value="PACK"></datalist>
-            <div class="af-err" id="af-err"></div>
-            <div class="af-row"><button type="button" id="af-ok" onclick="submitAdd()">Tambah produk</button><button type="button" onclick="closeAdd()">Batal</button></div>
+            <div id="month-bar" class="month-bar">
+                <button type="button" id="mb-prev" onclick="stepMonth(-1)" aria-label="Bulan sebelumnya">◀</button>
+                <label for="month-select">📅 Bulan</label>
+                <select id="month-select" onchange="changeMonth(this.value)"></select>
+                <button type="button" id="mb-next" onclick="stepMonth(1)" aria-label="Bulan berikutnya">▶</button>
+            </div>
+            <div class="month-note">Isian dan target tiap bulan tersimpan terpisah. Bulan bertanda ● sudah ada isiannya.</div>
         </div>
+
+        <div class="controls">
+            <button class="save-btn" onclick="saveData()">💾 Simpan Data</button>
+            <button class="pdf-btn" onclick="exportPDF()">📄 Cetak / Export PDF</button>
+            <button class="reset-btn" onclick="resetData()">🔄 Reset Outlet Ini</button>
+            <div id="save-status" class="save-status"></div>
+        </div>
+
+        <div class="tools-row">
+            <div class="tool-group">
+                <div class="sec-label">Cadangan data</div>
+                <div class="io-bar">
+                    <button type="button" onclick="exportData()">⬇️ Export Data</button>
+                    <button type="button" onclick="importData()">⬆️ Import Data</button>
+                    <input type="file" id="import-file" accept=".json,application/json" style="display:none" onchange="onImportFile(event)">
+                </div>
+            </div>
+            <div class="tool-group">
+                <div class="sec-label">Tampilan</div>
+                <div class="mode-switch">
+                    <button type="button" id="btn-mode-input" onclick="setMode('input')">📱 Mode Input (HP)</button>
+                    <button type="button" id="btn-mode-print" onclick="setMode('print')">🖨️ Mode Print Out</button>
+                </div>
+                <div id="mode-hint" class="mode-hint"></div>
+            </div>
+        </div>
+
+        <div id="cat-bar" class="cat-bar">
+            <button type="button" onclick="toggleAllCats(true)">📂 Buka semua kategori</button>
+            <button type="button" onclick="toggleAllCats(false)">📁 Tutup semua</button>
+        </div>
+
+        <div class="tabs-card">
+            <div class="sec-label">🏬 Pilih toko</div>
+            <div id="outlet-tabs" class="tabs"></div>
+        </div>
+
+        <details id="target-info" class="target-info"></details>
+
+        <details id="store-tools" class="add-tools store-tools">
+            <summary class="at-title">🏬 Kelola toko <span id="st-cur" class="st-cur"></span></summary>
+            <div class="at-body">
+                <div class="at-btns">
+                    <button type="button" id="st-add" onclick="openStoreAdd()">＋ Tambahkan Toko</button>
+                    <button type="button" id="st-del" class="st-del" onclick="deleteStore()">🗑 Hapus Toko Ini</button>
+                    <button type="button" id="st-restore" style="display:none" onclick="restoreStores()">↩ Pulihkan toko bawaan</button>
+                </div>
+                <div id="store-form" class="add-form" style="display:none">
+                    <div class="af-head">Nama toko baru</div>
+                    <input id="sf-name" type="text" maxlength="60" autocomplete="off" placeholder="mis. BORMA - BUAH BATU BANDUNG">
+                    <div class="af-err" id="sf-err"></div>
+                    <div class="af-row"><button type="button" id="sf-ok" onclick="submitStoreAdd()">Simpan toko</button><button type="button" onclick="closeStoreAdd()">Batal</button></div>
+                </div>
+            </div>
+        </details>
+
+        <details id="add-tools" class="add-tools">
+            <summary class="at-title">➕ Tambah produk baru</summary>
+            <div class="at-body">
+                <div class="at-sub">Pilih kategori tujuan:</div>
+                <div class="at-btns" id="at-btns"></div>
+                <div id="add-form" class="add-form" style="display:none">
+                    <div class="af-head" id="af-head"></div>
+                    <input id="af-name" type="text" maxlength="60" autocomplete="off" placeholder="Nama produk, mis. SANIA Royale Rice Bran Oil">
+                    <div class="af-row">
+                        <input id="af-kem" type="text" list="af-kem-list" maxlength="20" autocomplete="off" placeholder="Kemasan: BOTOL / POUCH / PACK">
+                        <input id="af-size" type="text" maxlength="12" autocomplete="off" placeholder="Size: 1L / 500ML / 1 KG">
+                    </div>
+                    <datalist id="af-kem-list"><option value="POUCH"><option value="BOTOL"><option value="JERIGEN"><option value="PET"><option value="PILLOW PACK"><option value="PACK"></datalist>
+                    <div class="af-err" id="af-err"></div>
+                    <div class="af-row"><button type="button" id="af-ok" onclick="submitAdd()">Tambah produk</button><button type="button" onclick="closeAdd()">Batal</button></div>
+                </div>
+            </div>
+        </details>
+        <details id="val-summary" class="val-summary" style="display:none"></details>
     </div>
-    <details id="val-summary" class="val-summary" style="display:none"></details>
     <div id="field-info" class="field-info"></div>
 
     <div id="pdf-container">
