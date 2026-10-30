@@ -383,6 +383,32 @@
             .app-head .month-bar label{display:none}
         }
 
+        /* ISI OTOMATIS */
+        .app-top .au-grid{display:grid;grid-template-columns:1fr 120px;gap:10px;margin-bottom:12px}
+        .app-top .au-field{margin-bottom:12px}
+        .app-top .au-grid .au-field{margin-bottom:0}
+        .app-top .au-field > label{display:block;font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--ui-muted);margin-bottom:5px}
+        .app-top .au-field select,.app-top .au-field input[type=text]{width:100%;box-sizing:border-box;padding:10px;font-size:16px;border:1px solid var(--ui-line);border-radius:8px;background:#fff;color:var(--ui-text)}
+        .app-top .au-chips{display:flex;flex-wrap:wrap;gap:6px}
+        .app-top .au-chip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--ui-line);border-radius:999px;background:#fff;font-size:13px;cursor:pointer;user-select:none}
+        .app-top .au-chip input{margin:0}
+        .app-top .au-prods{max-height:210px;overflow:auto;border:1px solid var(--ui-line);border-radius:8px;padding:4px 10px;background:#fff}
+        .app-top .au-prods label{display:flex;gap:8px;align-items:center;padding:6px 0;font-size:12px;border-bottom:1px solid #f0f2f5;cursor:pointer}
+        .app-top .au-prods label:last-child{border-bottom:0}
+        .app-top .au-mini{display:flex;gap:6px;margin-bottom:6px}
+        .app-top .au-mini button{padding:6px 10px;font-size:11px;font-weight:600;border:1px solid var(--ui-line);border-radius:6px;background:#f8fafc;color:var(--ui-text);cursor:pointer}
+        .app-top .au-info{margin:4px 0 12px;padding:10px 12px;border-radius:8px;background:#eef5ff;font-size:12px;line-height:1.5}
+        .app-top .au-info.bad{background:#fdecea;color:#8a1f17}
+        .app-top .au-actions{display:flex;flex-wrap:wrap;gap:8px}
+        .app-top .au-actions button{flex:1 1 150px;padding:11px 10px;font-size:13px;font-weight:700;border-radius:9px;border:1px solid var(--ui-line);background:#fff;color:var(--ui-text);cursor:pointer}
+        .app-top .au-actions button[data-act=go]{background:var(--ui-primary);border-color:var(--ui-primary);color:#fff}
+        .app-top .au-actions button:disabled{opacity:.45;cursor:not-allowed}
+        .app-top .au-res{margin-top:10px;padding:9px 12px;border-radius:8px;background:#e9f7ef;color:#14532d;font-size:12px;line-height:1.5}
+        .app-top .au-res:empty{display:none}
+        .app-top .au-note{margin-top:10px;font-size:11px;color:var(--ui-muted);line-height:1.5}
+        #pdf-container .week-input.af{background:#fff1a8 !important;box-shadow:inset 0 0 0 1px #e0bf3f}
+        @media print{#pdf-container .week-input.af{background:transparent !important;box-shadow:none !important}}
+
         /* PRINT SETTINGS */
         @media print {
             body { padding: 0; background: #fff; }
@@ -448,6 +474,11 @@
         </div>
 
         <details id="target-info" class="target-info"></details>
+
+        <details id="autofill-tools" class="add-tools autofill-tools">
+            <summary class="at-title">🪄 Isi otomatis dari target</summary>
+            <div class="at-body" id="au-body"></div>
+        </details>
 
         <details id="store-tools" class="add-tools store-tools">
             <summary class="at-title">🏬 Kelola toko <span id="st-cur" class="st-cur"></span></summary>
@@ -764,6 +795,7 @@
             applyCatCollapse();
             applyFieldHints();
             calculateAll();
+            afAfterRender();
         }
 
         // Kalkulasi Otomatis
@@ -991,7 +1023,7 @@
                 saveDOMToState();
                 const all = readAll();
                 all.version = 3; all.active = curOutlet; all.savedAt = new Date().toISOString();
-                all.outlets[OUTLETS[curOutlet].no] = { v: 2, stateData, headerData: getHeaderData(), tg: curTargets };
+                all.outlets[OUTLETS[curOutlet].no] = { v: 2, stateData, headerData: getHeaderData(), tg: curTargets, af: afMarks };
                 if (storageSet(STORAGE_KEY, JSON.stringify(all))) {
                     setStatus('✔ Tersimpan ' + nowText());
                     if (showAlert) alert('Data outlet ini berhasil disimpan!');
@@ -1020,6 +1052,7 @@
                 if (typeof header.outlet === 'string') header.outlet = header.outlet.replace(/^[0-9]+[.]\s*/, '');
             }
             setHeaderData(header || defaultHeader(i));
+            afMarks = (rec && rec.af && typeof rec.af === 'object' && !Array.isArray(rec.af)) ? rec.af : {};
             try {
                 renderTable();
             } catch (err) {
@@ -1067,6 +1100,246 @@
             if (root) root.addEventListener('input', scheduleAutosave);
             window.addEventListener('pagehide', () => saveData(false));
             document.addEventListener('visibilitychange', () => { if (document.hidden) saveData(false); });
+        }
+
+        // =====================================================
+        //  ISI OTOMATIS: sebar angka ke kolom WEEK agar total kategori mencapai X% dari target.
+        //  Hanya mengisi kolom WEEK (PCS); rumus total / ACV tetap yang lama.
+        //  Sel hasil isi otomatis berwarna kuning (hanya di layar, tidak ikut PDF / cetak) dan
+        //  tandanya hilang otomatis begitu sel diedit.
+        // =====================================================
+        let afMarks = {};        // kunci sel -> angka yang diisi otomatis (disimpan per outlet & bulan)
+        let auUndo = null;       // riwayat isi otomatis terakhir (untuk Batalkan)
+        let autoFillBusy = false;
+        let auResMsg = '';
+        const auSet = { cat: 0, pct: '70', weeks: [1, 2, 3, 4, 5], mode: 'empty' };
+        const auOff = {};        // nama kategori -> produk yang TIDAK dicentang
+
+        function afRowId(row) {
+            const v = s => { const el = row.querySelector(s); return el ? el.value : ''; };
+            return [v('.prod-name'), v('.prod-kemasan'), v('.prod-size')].join('||');
+        }
+        function afKey(catName, row, w) { return catName + '||' + afRowId(row) + '||' + w; }
+        function afCellKey(inp) {
+            const row = inp.closest('tr'), tb = inp.closest('tbody');
+            if (!row || !tb) return null;
+            const cat = stateData[parseInt(tb.id.replace('tbody-', ''), 10)];
+            if (!cat) return null;
+            return afKey(cat.name, row, Array.from(row.querySelectorAll('.week-input')).indexOf(inp) + 1);
+        }
+        // Tandai ulang sel kuning setelah tabel digambar ulang; buang tanda yang sudah tidak cocok
+        function applyAfMarks() {
+            const seen = {};
+            stateData.forEach((cat, ci) => {
+                const tb = document.getElementById('tbody-' + ci);
+                if (!tb) return;
+                tb.querySelectorAll('tr').forEach(row => {
+                    row.querySelectorAll('.week-input').forEach((inp, wi) => {
+                        const k = afKey(cat.name, row, wi + 1);
+                        if (Object.prototype.hasOwnProperty.call(afMarks, k) && inp.value !== '' && String(afMarks[k]) === inp.value) {
+                            inp.classList.add('af'); seen[k] = afMarks[k];
+                        } else inp.classList.remove('af');
+                    });
+                });
+            });
+            afMarks = seen;
+        }
+        function afAfterRender() { auUndo = null; auResMsg = ''; applyAfMarks(); renderAutoFill(); }
+
+        function auPlanCat(ci, selRows) {
+            const cat = stateData[ci], tb = document.getElementById('tbody-' + ci);
+            const p = { ci, name: cat ? cat.name : '?', unit: (cat && (cat.name === 'COOKING OIL' || cat.name === 'SOFT OIL')) ? 'L' : 'KG', level: 'bad', msg: '', cells: [], skipped: 0 };
+            if (!cat || !tb) { p.msg = 'kategori tidak ditemukan.'; return p; }
+            const T = parseNumLoose(tb.querySelector('.target-input').value).value;
+            if (!(T > 0)) { p.msg = 'isi target kategori dulu (kartu 🎯 atau kolom TARGET).'; return p; }
+            const pct = parseFloat(String(auSet.pct).replace(',', '.'));
+            p.T = T; p.pct = pct; p.G = T * pct / 100;
+            let others = 0; const cells = [];
+            tb.querySelectorAll('tr').forEach((row, ri) => {
+                const m = getMultiplier(row.querySelector('.prod-size').value);
+                const rowOn = !selRows || selRows.has(ri);
+                if (rowOn && !(m > 0)) p.skipped++;
+                row.querySelectorAll('.week-input').forEach((inp, wi) => {
+                    const raw = inp.value, pv = parseNumLoose(raw).value, val = isFinite(pv) ? pv : 0;
+                    const empty = raw.trim() === '' || (isFinite(pv) && pv === 0);
+                    const writable = rowOn && m > 0 && auSet.weeks.includes(wi + 1) && (auSet.mode === 'all' || empty);
+                    if (writable) cells.push({ row, inp, wi, m, pcs: 0, frac: 0 }); else others += val * m;
+                });
+            });
+            p.others = others; p.cells = cells;
+            if (!cells.length) { p.level = 'info'; p.msg = 'tidak ada sel yang bisa diisi (cek pilihan week / produk, size produk, atau pilih mode “timpa”).'; return p; }
+            const gap = p.G - others;
+            if (gap <= 0) { p.level = 'info'; p.cells = []; p.msg = 'angka yang sudah ada (' + fmtN(others) + ' ' + p.unit + ') sudah mencapai ' + fmtN(p.G) + ' ' + p.unit + '.'; return p; }
+            const per = gap / cells.length;
+            cells.forEach(c => { const ideal = per / c.m; c.pcs = Math.floor(ideal + 1e-9); c.frac = ideal - c.pcs; });
+            let R = gap - cells.reduce((s, c) => s + c.pcs * c.m, 0);
+            cells.slice().sort((a, b) => b.frac - a.frac).forEach(c => { if (R > 0 && c.m < 2 * R) { c.pcs++; R -= c.m; } });
+            p.after = others + cells.reduce((s, c) => s + c.pcs * c.m, 0);
+            p.pctAfter = p.after / T * 100;
+            p.filled = cells.filter(c => c.pcs > 0).length;
+            p.level = 'ok';
+            return p;
+        }
+        function auPlans() {
+            const pct = parseFloat(String(auSet.pct).replace(',', '.'));
+            if (!(pct > 0 && pct <= 200)) return { err: 'Persen tidak valid. Isi angka 1–200, mis. 70.' };
+            if (!auSet.weeks.length) return { err: 'Pilih minimal satu week.' };
+            if (auSet.cat === 'all') return { plans: stateData.map((c, i) => auPlanCat(i, null)) };
+            const sel = new Set();
+            document.querySelectorAll('#au-prods input[data-row]').forEach(cb => { if (cb.checked) sel.add(+cb.dataset.row); });
+            if (!sel.size) return { err: 'Pilih minimal satu produk.' };
+            return { plans: [auPlanCat(auSet.cat, sel)] };
+        }
+        function auDescribe(p) {
+            if (p.level !== 'ok') return p.name + ': ' + p.msg;
+            return p.name + ': target ' + fmtN(p.T) + ' ' + p.unit + ' × ' + fmtN(p.pct) + '% = ' + fmtN(p.G) + ' ' + p.unit +
+                '. Mengisi ' + p.filled + ' sel → total ≈ ' + fmtN(p.after) + ' ' + p.unit + ' (' + fmtN(p.pctAfter) + '%).' +
+                (p.skipped ? ' ' + p.skipped + ' produk dilewati karena size tidak terbaca.' : '');
+        }
+        function auRefreshInfo() {
+            const el = document.getElementById('au-info'), go = document.querySelector('#au-body [data-act=go]');
+            if (!el) return;
+            const r = auPlans();
+            if (r.err) { el.className = 'au-info bad'; el.textContent = r.err; if (go) go.disabled = true; return; }
+            const anyOk = r.plans.some(p => p.level === 'ok');
+            el.className = 'au-info' + (r.plans.every(p => p.level === 'bad') ? ' bad' : '');
+            el.innerHTML = r.plans.map(p => esc(auDescribe(p))).join('<br>');
+            if (go) go.disabled = !anyOk;
+        }
+        function auSaveOff() {
+            if (auSet.cat === 'all' || !stateData[auSet.cat]) return;
+            const off = [];
+            document.querySelectorAll('#au-prods input[data-row]').forEach(cb => { if (!cb.checked) off.push(cb.dataset.id); });
+            auOff[stateData[auSet.cat].name] = off;
+        }
+
+        function renderAutoFill() {
+            const box = document.getElementById('au-body');
+            if (!box || !stateData.length) return;
+            if (auSet.cat !== 'all' && !stateData[auSet.cat]) auSet.cat = 0;
+            const catOpts = stateData.map((c, i) => '<option value="' + i + '"' + (auSet.cat === i ? ' selected' : '') + '>' + esc(c.name) + '</option>').join('') +
+                '<option value="all"' + (auSet.cat === 'all' ? ' selected' : '') + '>SEMUA KATEGORI (semua produk)</option>';
+            const weeks = [1, 2, 3, 4, 5].map(w => '<label class="au-chip"><input type="checkbox" data-w="' + w + '"' + (auSet.weeks.includes(w) ? ' checked' : '') + '> Week ' + w + '</label>').join('');
+            let prods = '';
+            if (auSet.cat !== 'all') {
+                const tb = document.getElementById('tbody-' + auSet.cat), off = auOff[stateData[auSet.cat].name] || [];
+                const rows = tb ? Array.from(tb.querySelectorAll('tr')).map((row, ri) => {
+                    const id = afRowId(row), pr = id.split('||');
+                    return '<label><input type="checkbox" data-row="' + ri + '" data-id="' + esc(id) + '"' + (off.includes(id) ? '' : ' checked') + '> ' +
+                        esc(pr[0]) + ' · ' + esc(pr[1]) + ' · ' + esc(pr[2]) + '</label>';
+                }).join('') : '';
+                prods = '<div class="au-field"><label>Produk yang diisi</label>' +
+                    '<div class="au-mini"><button type="button" data-act="selall">Pilih semua</button><button type="button" data-act="selnone">Kosongkan pilihan</button></div>' +
+                    '<div class="au-prods" id="au-prods">' + rows + '</div></div>';
+            }
+            const mode = (v, t) => '<label class="au-chip"><input type="radio" name="au-mode" value="' + v + '"' + (auSet.mode === v ? ' checked' : '') + '> ' + t + '</label>';
+            box.innerHTML =
+                '<div class="au-grid"><div class="au-field"><label for="au-cat">Kategori</label><select id="au-cat">' + catOpts + '</select></div>' +
+                '<div class="au-field"><label for="au-pct">% dari target</label><input id="au-pct" type="text" inputmode="decimal" autocomplete="off" value="' + esc(auSet.pct) + '"></div></div>' +
+                '<div class="au-field"><label>Week yang diisi</label><div class="au-chips">' + weeks + '</div></div>' + prods +
+                '<div class="au-field"><label>Jika sel sudah ada isinya</label><div class="au-chips">' +
+                    mode('empty', 'Lewati (isi yang kosong saja)') + mode('all', 'Timpa sel terpilih') + '</div></div>' +
+                '<div class="au-info" id="au-info"></div>' +
+                '<div class="au-actions"><button type="button" data-act="go">🪄 Isi sekarang</button>' +
+                    '<button type="button" data-act="undo"' + (auUndo ? '' : ' disabled') + '>↩ Batalkan isi terakhir</button>' +
+                    '<button type="button" data-act="clear">🧹 Hapus semua isian otomatis</button></div>' +
+                '<div class="au-res" id="au-res">' + esc(auResMsg) + '</div>' +
+                '<div class="au-note">Hanya mengisi kolom WEEK (PCS). Angka dibagi rata ke week dan produk yang dipilih (dihitung dari size produk), lalu dibulatkan ke PCS utuh sehingga total bisa meleset sedikit dari persen yang diminta. ' +
+                    'Sel kuning = hasil isi otomatis: ganti dengan data asli dan warnanya hilang sendiri. Warna kuning tidak ikut PDF / cetak.</div>';
+            auRefreshInfo();
+        }
+
+        function auSetCell(inp, nv, key, mark) {
+            inp.value = nv;
+            if (mark && nv !== '') { inp.classList.add('af'); afMarks[key] = nv; }
+            else { inp.classList.remove('af'); delete afMarks[key]; }
+            inp.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        function auGo() {
+            const r = auPlans();
+            if (r.err) { auResMsg = ''; auRefreshInfo(); return; }
+            const plans = r.plans.filter(p => p.level === 'ok');
+            if (!plans.length) { auRefreshInfo(); return; }
+            const undo = []; let n = 0;
+            autoFillBusy = true;
+            try {
+                plans.forEach(p => p.cells.forEach(c => {
+                    const nv = c.pcs > 0 ? String(c.pcs) : '', prev = c.inp.value;
+                    if (nv === prev) return;
+                    const key = afKey(p.name, c.row, c.wi + 1);
+                    undo.push({ inp: c.inp, prev, hadAf: c.inp.classList.contains('af'), key, prevMark: afMarks[key] });
+                    auSetCell(c.inp, nv, key, true);
+                    if (nv !== '') n++;
+                }));
+            } finally { autoFillBusy = false; }
+            auUndo = undo.length ? undo : null;
+            const sum = plans.map(p => {
+                const tb = document.getElementById('tbody-' + p.ci), tot = tb.querySelector('.totkat-output').value, acv = tb.querySelector('.acv-output').value;
+                return p.name + ' ' + (tot || '0') + ' ' + p.unit + (acv ? ' (ACV ' + acv + ')' : '');
+            }).join(' · ');
+            auResMsg = '✔ ' + n + ' sel terisi. ' + sum;
+            renderAutoFill();
+            setStatus('Isi otomatis: ' + n + ' sel terisi.');
+        }
+        function auUndoGo() {
+            if (!auUndo) return;
+            if (auUndo.some(u => !document.contains(u.inp))) { auUndo = null; auResMsg = 'Tabel sudah berubah, isi terakhir tidak bisa dibatalkan.'; renderAutoFill(); return; }
+            autoFillBusy = true;
+            try {
+                for (let i = auUndo.length - 1; i >= 0; i--) {
+                    const u = auUndo[i];
+                    auSetCell(u.inp, u.prev, u.key, false);
+                    if (u.prevMark !== undefined && u.hadAf) { u.inp.classList.add('af'); afMarks[u.key] = u.prevMark; }
+                }
+            } finally { autoFillBusy = false; }
+            auUndo = null; auResMsg = '↩ Isi otomatis terakhir dibatalkan.';
+            renderAutoFill();
+        }
+        function auClearAll() {
+            const cells = Array.from(document.querySelectorAll('#pdf-container .week-input.af'));
+            if (!cells.length) { auResMsg = 'Tidak ada sel kuning (isian otomatis) di outlet ini.'; renderAutoFill(); return; }
+            if (!confirm('Hapus ' + cells.length + ' sel isian otomatis (kuning) di outlet ini?\nAngka yang Anda ketik sendiri tidak ikut terhapus.')) return;
+            autoFillBusy = true;
+            try { cells.forEach(c => auSetCell(c, '', afCellKey(c), false)); } finally { autoFillBusy = false; }
+            afMarks = {}; auUndo = null; auResMsg = '🧹 ' + cells.length + ' sel isian otomatis dihapus.';
+            renderAutoFill();
+        }
+        function initAutoFill() {
+            const box = document.getElementById('au-body');
+            if (box) {
+                const onChg = e => {
+                    const t = e.target;
+                    if (t.id === 'au-cat') { auSet.cat = t.value === 'all' ? 'all' : +t.value; auResMsg = ''; renderAutoFill(); return; }
+                    if (t.id === 'au-pct') auSet.pct = t.value;
+                    else if (t.dataset && t.dataset.w) auSet.weeks = Array.from(box.querySelectorAll('input[data-w]')).filter(x => x.checked).map(x => +x.dataset.w);
+                    else if (t.dataset && t.dataset.row != null) auSaveOff();
+                    else if (t.name === 'au-mode') auSet.mode = t.value;
+                    else return;
+                    auRefreshInfo();
+                };
+                box.addEventListener('input', e => { if (e.target.id === 'au-pct') onChg(e); });
+                box.addEventListener('change', onChg);
+                box.addEventListener('click', e => {
+                    const b = e.target.closest('[data-act]');
+                    if (!b || b.disabled) return;
+                    const act = b.dataset.act;
+                    if (act === 'go') auGo();
+                    else if (act === 'undo') auUndoGo();
+                    else if (act === 'clear') auClearAll();
+                    else if (act === 'selall' || act === 'selnone') {
+                        box.querySelectorAll('#au-prods input[data-row]').forEach(cb => { cb.checked = act === 'selall'; });
+                        auSaveOff(); auRefreshInfo();
+                    }
+                });
+            }
+            const root = document.getElementById('pdf-container');
+            if (root) root.addEventListener('input', e => {
+                const t = e.target;
+                if (autoFillBusy || !t || !t.classList || !t.classList.contains('af')) return;
+                t.classList.remove('af');
+                const k = afCellKey(t); if (k) delete afMarks[k];
+                auUndo = null;
+            });
         }
 
         // --- EXPORT PDF (KERTAS F4) ---
@@ -1502,7 +1775,7 @@
                 saveDOMToState();
                 const all = readAll();
                 // data outlet yang sedang dibuka ikut dibawa walau penyimpanan browser tidak tersedia
-                all.outlets[OUTLETS[curOutlet].no] = { v: 2, stateData, headerData: getHeaderData(), tg: curTargets };
+                all.outlets[OUTLETS[curOutlet].no] = { v: 2, stateData, headerData: getHeaderData(), tg: curTargets, af: afMarks };
                 const n = Object.keys(all.outlets).length;
                 const name = 'Backup_Sellout_' + curMonth + '_' + ymd() + '.json';
                 const json = JSON.stringify({ app: APP_ID, format: 1, month: curMonth, periode: periodeText(curMonth), exportedAt: new Date().toISOString(), customOutlets: storeCfg.custom.map(c => ({ no: c.no, name: c.name })), outlets: all.outlets });
@@ -1545,8 +1818,10 @@
                 c.items = c.items.slice(0, 100).map(it => it.map((v, k) => cap(v, k < 3 ? lim[k] : 20)));
             });
             if (rec.v !== 2) migrateV2(st);
+            const af = {};
+            if (rec.af && typeof rec.af === 'object' && !Array.isArray(rec.af)) Object.keys(rec.af).slice(0, 600).forEach(k => { if (k.length <= 250) af[k] = cap(rec.af[k], 20); });
             const h = rec.headerData && typeof rec.headerData === 'object' ? rec.headerData : {};
-            return { v: 2, stateData: st, headerData: { spg: cap(h.spg, 60), outlet: cap(h.outlet, 80), periode: cap(h.periode, 60) }, tg: loadTg(i, rec.tg, ym) };
+            return { v: 2, stateData: st, headerData: { spg: cap(h.spg, 60), outlet: cap(h.outlet, 80), periode: cap(h.periode, 60) }, tg: loadTg(i, rec.tg, ym), af: af };
         }
         function applyImport(text) {
             let obj;
@@ -1748,7 +2023,7 @@
             renderStoreTools();
         }
 
-        window.onload = function () { initMode(); applyStoreCfg(); initMonth(); loadData(); initValidation(); initAddTools(); initTargetCard(); initCatCards(); initAutosave(); initFieldInfo(); initStoreTools(); };
+        window.onload = function () { initMode(); applyStoreCfg(); initMonth(); initAutoFill(); loadData(); initValidation(); initAddTools(); initTargetCard(); initCatCards(); initAutosave(); initFieldInfo(); initStoreTools(); };
     </script>
 </body>
 </html>
